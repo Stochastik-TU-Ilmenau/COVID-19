@@ -58,3 +58,30 @@ lookup_ger <- subset(ger, select=c("reg0.id", "reg0.name",
                                    "reg1.id", "reg1.name"))
 lookup_ger <- unique(lookup_ger[order(lookup_ger$reg0.id),])
 write.csv(lookup_ger, file='./clean/lookup_ger_all.csv')
+
+ger_b <- read.csv('./clean/data_ger_all.csv')
+ger_b <- aggregate(cbind(new.cases, new.dead) ~ day + yday + date
+                   + reg0.id + reg0.name, ger_b, sum)
+ger_b <- ger_b[order(ger_b$reg0.id),]
+ger_b <- ger_b[order(ger_b$day),]
+# complete combinations of factors:
+df1 <- unique(ger_b[, c("day", "yday", "date")])
+df2 <- unique(ger_b[, c("reg0.id", "reg0.name")])
+df3 <- merge(df1, df2)
+ger_b <- merge(ger_b, df3, all=TRUE)
+ger_b[is.na(ger_b)] <- 0
+# add case statistics:
+for (id in ger_b$reg0.id) {
+  mask <- ger_b$reg0.id == id
+  ger_b$tot.cases[mask] <- cumsum(ger_b$new.cases[mask])
+} # add tot.cases
+for (id in ger_b$reg0.id) {
+  mask <- ger_b$reg0.id == id
+  ger_b$tot.dead[mask] <- cumsum(ger_b$new.dead[mask])
+} # add new.dead
+# reorder column names:
+ger_b <- ger_b[, c("day", "yday", "date",
+                   "reg0.id", "reg0.name",
+                   "tot.cases", "tot.dead",
+                   "new.cases", "new.dead")]
+write.csv(ger_b, file='./clean/data_ger_bundl.csv')

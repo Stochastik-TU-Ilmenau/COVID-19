@@ -1,0 +1,32 @@
+---
+title: 'Growth factor Germany'
+output: html_document
+---
+
+```{r, }
+germany <- read.csv("data/clean/data_ger_bundl.csv")
+
+df <- reshape(germany[,c("date", "day", "reg0.id", "tot.cases")], v.names="tot.cases", idvar="date", timevar="reg0.id", direction="wide")
+df <- df[order(df$date),-3]
+
+change.inc <- sapply(df[,-(1:2)], function(x) {
+ diff( log(diff(x)) )
+})
+change.inc.se <- sapply(df[,-(1:2)], function(x) {
+ sqrt( 1 / diff(x)[-1] + 1 / diff(x)[-(length(x)-1)] )
+})
+
+bund <- rowSums(df[,-(1:2)])
+mean.change.inc <- diff( log(diff( bund )) )
+mean.change.inc.se <- sqrt( 1 / diff(bund)[-1] + 1 / diff(bund)[-(length(bund)-1)] )
+
+matplot(df$day[-(1:2)], change.inc, type="l", xlim=c(40,60), axes=F, xlab="Monatstag", ylab="Wachstumsrate", main="Zeitlicher Verlauf in Deutschland", col2rgb(2:17, alpha=.3))
+axis(1, at=df$day, labels=substr(df$date,9,10))
+axis(2)
+box()
+lines(df$day[-(1:2)], mean.change.inc, type="o", lwd=2, col="black", xpd=F, cex=.6, pch=3)
+lines(df$day[-(1:2)], mean.change.inc +  2 * mean.change.inc.se, lwd=2, lty = 2, col="black")
+lines(df$day[-(1:2)], mean.change.inc -  2 * mean.change.inc.se, lwd=2, lty = 2, col="black", xpd=F)
+abline(h=0, col="blue", lwd=2, lty=3)
+abline(v=58.5 - 7 * (0:5), col="green3", lwd=2, lty=3, xpd=F)
+```
