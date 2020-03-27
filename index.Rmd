@@ -1,32 +1,55 @@
 ---
-title: 'Growth factor Germany'
+title: 'Work in Progress - Do not use!'
 output: html_document
 ---
 
-```{r, }
+
+```{r plots, echo = F, cache = F, message = F}
+library(lubridate, warn.conflicts = F)
 germany <- read.csv("data/clean/data_ger_bundl.csv")
+italy <- read.csv("data/clean/data_italy_regions.csv")
 
-df <- reshape(germany[,c("date", "day", "reg0.id", "tot.cases")], v.names="tot.cases", idvar="date", timevar="reg0.id", direction="wide")
-df <- df[order(df$date),-3]
+make_plot <- function(df, country_name) {
 
-change.inc <- sapply(df[,-(1:2)], function(x) {
- diff( log(diff(x)) )
-})
-change.inc.se <- sapply(df[,-(1:2)], function(x) {
- sqrt( 1 / diff(x)[-1] + 1 / diff(x)[-(length(x)-1)] )
-})
+    df <- df[, c("date", "day", "reg0.name", "tot.cases")]
+    df <- reshape(df, v.names = "tot.cases", idvar = "date",
+        timevar = "reg0.name", direction = "wide")
+    df <- df[order(df$date), -3]
 
-bund <- rowSums(df[,-(1:2)])
-mean.change.inc <- diff( log(diff( bund )) )
-mean.change.inc.se <- sqrt( 1 / diff(bund)[-1] + 1 / diff(bund)[-(length(bund)-1)] )
+    whole_country <- rowSums(df[, - (1:2)])
+    below_hundred_cases <- max(max(which(whole_country < 100)), 1)
 
-matplot(df$day[-(1:2)], change.inc, type="l", xlim=c(40,60), axes=F, xlab="Monatstag", ylab="Wachstumsrate", main="Zeitlicher Verlauf in Deutschland", col2rgb(2:17, alpha=.3))
-axis(1, at=df$day, labels=substr(df$date,9,10))
-axis(2)
-box()
-lines(df$day[-(1:2)], mean.change.inc, type="o", lwd=2, col="black", xpd=F, cex=.6, pch=3)
-lines(df$day[-(1:2)], mean.change.inc +  2 * mean.change.inc.se, lwd=2, lty = 2, col="black")
-lines(df$day[-(1:2)], mean.change.inc -  2 * mean.change.inc.se, lwd=2, lty = 2, col="black", xpd=F)
-abline(h=0, col="blue", lwd=2, lty=3)
-abline(v=58.5 - 7 * (0:5), col="green3", lwd=2, lty=3, xpd=F)
+    dates <- seq(
+        ymd(df$date[below_hundred_cases]) + 3,
+        length.out = nrow(df) - below_hundred_cases,
+        by = "1 day")
+
+    regions <- substr(names(df)[- (1:2)], start = 11, stop = 100)
+    n_regions <- length(regions)
+
+    matplot(dates, df[ - (1:below_hundred_cases), - (1:2)], axes = F, type = "l", col = 1:n_regions, lty = 1:n_regions, xlab = "Date", ylab = "Total cases", log = "y", main = paste0("Spread of COVID-19 in regions of ", country_name))
+    legend("topleft", legend = regions, col = 1:n_regions, cex = .5, lty = 1:n_regions)
+    axis(1, dates, format(dates, "%b %d"), cex.axis = .4)
+    axis(2)
+    box()
+}
+
 ```
+
+## {.tabset .tabset-fade}
+
+Explation of what we do.
+
+### Germany
+
+```{r, echo = F, warning = F, fig.width = 10}
+make_plot(germany, "Germany")
+```
+
+### Italy
+
+```{r, echo = F, warning =F, fig.width = 10}
+make_plot(italy, "Italy")
+```
+
+##
