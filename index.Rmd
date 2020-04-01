@@ -83,8 +83,9 @@ make_plot <- function(country_name) {
     estimates$logRH[is.infinite(estimates$logRH)] <- NA
     estimates$wday <- factor(wday(estimates$date))
     lm.wday <- lm(logRH ~ wday, estimates, weights = R.H / R.H.se)
+    lm.inter <- lm(logRH ~ 1, estimates, weights = R.H / R.H.se)
     estimates$RH.wday <- exp(
-        estimates$logRH - predict(lm.wday, newdata = estimates) + mean(estimates$logRH, na.rm = TRUE)
+        estimates$logRH - predict(lm.wday, newdata = estimates) + predict(lm.inter, newdata = estimates)
     )
 
     estimates <- estimates %>%
@@ -97,7 +98,7 @@ make_plot <- function(country_name) {
         # bug in ggplotly, so we have to split our lines into two pieces
         # see https://github.com/tidyverse/ggplot2/issues/2006
         geom_ribbon(
-            aes(ymin = R.H.lower, ymax = R.H.upper), 
+            aes(color = "estimator", ymin = R.H.lower, ymax = R.H.upper), 
             alpha = 0.2,
             data = ~head(., -2)
             ) +
@@ -138,7 +139,7 @@ make_plot <- function(country_name) {
 
 ## {.tabset .tabset-fade}
 
-Explation of what we do.
+Explanation of what we do.
 
 <!--
 See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
