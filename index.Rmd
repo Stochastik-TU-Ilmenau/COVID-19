@@ -57,9 +57,15 @@ R.H <- function(
     if(pad.zeros) ret[-(1:(length(profile)-1)),] else ret
 }
 
-infectivity <- c(0, .5, (1 - 1/6)^(0:21))
+# geometric decay:
+#infectivity <- c(0, .5, (1 - 1/6)^(0:21))
+#names(infectivity) <- seq_along(infectivity)
+#infectivity <- infectivity / sum(infectivity)
+# more realistic:
+infectivity <- c((0:3)/3, 1, (5:0)/5)
 names(infectivity) <- seq_along(infectivity)
 infectivity <- infectivity / sum(infectivity)
+
 
 width <- 2
 report.delay <- 7
@@ -103,18 +109,18 @@ make_plot <- function(country_name) {
             alpha = 0.2,
             data = ~head(., -2)
             ) +
-        geom_line(aes(y = RH.wday, color = "weekday effect removed"), data = ~head(., -2), size = 1.5) +
-        geom_line(aes(y = RH.wday, color = "weekday effect removed"), data = ~tail(., 3), size = 1.5, alpha = .2) +
+        geom_line(aes(y = RH.wday, color = "remove weekday effect"), data = ~head(., -2)) +
+        geom_line(aes(y = RH.wday, color = "remove weekday effect"), data = ~tail(., 3), alpha = .2) +
         scale_color_manual(
             name = "",
-            values = c("estimator" = "black", "weekday effect removed" = "blue"),
-            labels = c("estimator", "weekday effect removed")
+            values = c("estimator" = "black", "remove weekday effect" = "blue"),
+            labels = c("estimator", "remove weekday effect")
             ) +
         theme_bw() +
         scale_y_log10() + # explicit ylim can lead to NaN
         xlim(estimates$date[1], today()) +
         geom_hline(
-            yintercept = c(1, 2.4),
+            yintercept = c(1.0), # R_0 = 2.5
             color = "red",
             linetype = "dotted",
             alpha = .5
@@ -148,7 +154,12 @@ on generating tabs in rmarkdown automatically
 -->
 ```{r, echo = F}
 
-countries <- c("Germany", "Italy", "Spain", "France", "Switzerland", "Netherlands", "Austria", "United Kingdom", "Korea, South", "US")
+maxday <- max(johns_hopkins$day)
+df <- subset(johns_hopkins, day == maxday, select = c(reg0.name, tot.cases))
+df <- df[rev(order(df$tot.cases)),]
+countries <- df$reg0.name[1:21]
+
+#countries <- c("Germany", "Italy", "Spain", "France", "Switzerland", "Netherlands", "Austria", "United Kingdom", "Korea, South", "US")
 names(countries) <- countries
 
 plots <- lapply(countries, make_plot)
