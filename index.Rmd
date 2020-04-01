@@ -79,13 +79,13 @@ make_plot <- function(country_name) {
 
     # estimate and subtract effect of weekday on a log-scale
     # assuming constant proportion of under-/overreporting per weekday
-    #estimates$logRH <- log(estimates$R.H)
-    #estimates$logRH[is.infinite(estimates$logRH)] <- NA
-    #estimates$wday <- factor(wday(estimates$date))
-    #lm.wday <- lm(logRH ~ wday, estimates, weights = R.H / R.H.se)
-    #estimates$RH.wday <- exp(
-    #    estimates$logRH - predict(lm.wday, newdata = estimates) + mean(estimates$logRH, na.rm = TRUE)
-    #)
+    estimates$logRH <- log(estimates$R.H)
+    estimates$logRH[is.infinite(estimates$logRH)] <- NA
+    estimates$wday <- factor(wday(estimates$date))
+    lm.wday <- lm(logRH ~ wday, estimates, weights = R.H / R.H.se)
+    estimates$RH.wday <- exp(
+        estimates$logRH - predict(lm.wday, newdata = estimates) + mean(estimates$logRH, na.rm = TRUE)
+    )
 
     estimates <- estimates %>%
         filter(!is.na(R.H), !is.na(R.H.lower), !is.na(R.H.upper)) %>%
@@ -101,16 +101,21 @@ make_plot <- function(country_name) {
             alpha = 0.2,
             data = ~head(., -2)
             ) +
-        #geom_line(aes(y = RH.wday), data = ~head(., -2), color = "blue", size = 1.5) +
-        #geom_line(aes(y = RH.wday), data = ~tail(., 3), color = "blue", size = 1.5, alpha = .2) +
-        theme_minimal() +
+        geom_line(aes(y = RH.wday), data = ~head(., -2), color = "blue", size = 1.5) +
+        geom_line(aes(y = RH.wday), data = ~tail(., 3), color = "blue", size = 1.5, alpha = .2) +
+        theme_bw() +
         scale_y_log10(limits = c(0.5, NA)) +
-        geom_hline(yintercept = c(1, 2.4), color = "red") +
+        geom_hline(
+            yintercept = c(1, 2.4),
+            color = "red",
+            linetype = "dotted",
+            alpha = .5
+            ) +
         geom_vline(
             xintercept = as.numeric(
                 seq(ymd("2020-02-03"), by = "1 week", length.out = 100) - .5
             ),
-            linetype = 3,
+            linetype = "twodash",
             alpha = 0.6,
             color = "blue"
         ) +
