@@ -3,12 +3,13 @@ title: 'Work in Progress - Do not use!'
 output: html_document
 ---
 
-```{r libraries, echo = F, message = F, warning = F}
+```{r libraries, echo = F, message = F, warning = F, results='hide'}
 library(lubridate, warn.conflicts = F)
 library(plotly, warn.conflicts = F)
 library(ggplot2, warn.conflicts = F)
 library(magrittr, warn.conflicts = F)
 library(dplyr, warn.conflicts = F)
+Sys.setlocale('LC_TIME', 'C')
 ```
 
 ```{r data, echo = F}
@@ -90,7 +91,7 @@ make_plot <- function(country_name) {
 
     estimates <- estimates %>%
         filter(!is.na(R.H), !is.na(R.H.lower), !is.na(R.H.upper)) %>%
-        filter(tot.cases > 20)
+        filter(tot.cases > 30)
 
     ggplot(estimates, aes(x = date, y = R.H)) +
         geom_line(aes(color = "estimator"), data = ~head(., -2), alpha = 1, show.legend = TRUE) +
@@ -110,7 +111,7 @@ make_plot <- function(country_name) {
             labels = c("estimator", "weekday effect removed")
             ) +
         theme_bw() +
-        scale_y_log10(limits = c(0.5, NA)) +
+        scale_y_log10() + # explicit ylim can lead to NaN
         xlim(estimates$date[1], today()) +
         geom_hline(
             yintercept = c(1, 2.4),
@@ -147,7 +148,7 @@ on generating tabs in rmarkdown automatically
 -->
 ```{r, echo = F}
 
-countries <- c("Germany", "Italy", "Spain", "US")
+countries <- c("Germany", "Italy", "Spain", "France", "Switzerland", "Netherlands", "Austria", "United Kingdom", "Korea, South", "US")
 names(countries) <- countries
 
 plots <- lapply(countries, make_plot)
