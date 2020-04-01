@@ -110,6 +110,7 @@ make_plot <- function(country_name) {
             ) +
         theme_bw() +
         scale_y_log10(limits = c(0.5, NA)) +
+        xlim(estimates$date[1], today()) +
         geom_hline(
             yintercept = c(1, 2.4),
             color = "red",
