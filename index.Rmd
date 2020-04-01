@@ -92,9 +92,8 @@ make_plot <- function(country_name) {
         filter(tot.cases > 20)
 
     ggplot(estimates, aes(x = date, y = R.H)) +
-        geom_line(data = ~head(., -2), alpha = 1, show.legend = TRUE) +
-        geom_line(data = ~tail(., 3), alpha = .3, linetype = 2) +
-        scale_color_manual(values = c("blue")) +
+        geom_line(aes(color = "estimator"), data = ~head(., -2), alpha = 1, show.legend = TRUE) +
+        geom_line(aes(color = "estimator"), data = ~tail(., 3), alpha = .3, linetype = 2) +
         # bug in ggplotly, so we have to split our lines into two pieces
         # see https://github.com/tidyverse/ggplot2/issues/2006
         geom_ribbon(
@@ -102,8 +101,13 @@ make_plot <- function(country_name) {
             alpha = 0.2,
             data = ~head(., -2)
             ) +
-        geom_line(aes(y = RH.wday), data = ~head(., -2), color = "blue", size = 1.5) +
-        geom_line(aes(y = RH.wday), data = ~tail(., 3), color = "blue", size = 1.5, alpha = .2) +
+        geom_line(aes(y = RH.wday, color = "weekday effect removed"), data = ~head(., -2), size = 1.5) +
+        geom_line(aes(y = RH.wday, color = "weekday effect removed"), data = ~tail(., 3), size = 1.5, alpha = .2) +
+        scale_color_manual(
+            name = "",
+            values = c("estimator" = "black", "weekday effect removed" = "blue"),
+            labels = c("estimator", "weekday effect removed")
+            ) +
         theme_bw() +
         scale_y_log10(limits = c(0.5, NA)) +
         geom_hline(
