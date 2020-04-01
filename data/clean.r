@@ -26,147 +26,114 @@ library(lubridate, warn.conflicts=FALSE)
 #
 ## =============================================================================
 
-
-## 1) region: germany; all data ================================================
-#
-# this data.frame does NOT contain ALL combinations of factors !
-# and they are not completed either since too many combinations...
-# all combinations only in derived data frames (see below)
-#
-ger <- read.csv('./rki_data/RKI_COVID19.csv')
-# subsetting and reordering: (ignore "Datenstand" and "ObjectId")
-ger <- subset(ger, select=c("Meldedatum", "IdBundesland", "Bundesland",
-                            "IdLandkreis", "Landkreis", "AnzahlFall",
-                            "AnzahlTodesfall", "Altersgruppe", "Geschlecht"))
-# renaming:
-names(ger) <- c("date", "reg0.id", "reg0.name", "reg1.id", "reg1.name",
-                "new.cases", "new.dead", "age", "sex")
-ger$date <- as_date(ger$date) # date in correct format
-ger$yday <- yday(ger$date) # add yday
-ger$day <- ger$yday - min(ger$yday) # add day
-ger <- ger[order(ger$day),] # reorder
-# for derived data frames additonal case statistics (tot.cases, ...) are added;
-# here too many combinations of factors make this impractical !
-# reordering:
-ger <- ger[, c("day", "yday", "date",
-               "reg0.id", "reg0.name", "reg1.id", "reg1.name",
-               "new.cases", "new.dead",
-               "age", "sex")]
-write.csv(ger, file='./clean/data_ger_all.csv')
-## 3) # create lookup table for ger all ========================================
-lookup_ger <- subset(ger, select=c("reg0.id", "reg0.name",
-                                   "reg1.id", "reg1.name"))
-lookup_ger <- unique(lookup_ger[order(lookup_ger$reg0.id),])
-write.csv(lookup_ger, file='./clean/lookup_ger_all.csv')
-
-ger_b <- read.csv('./clean/data_ger_all.csv')
-ger_b <- aggregate(cbind(new.cases, new.dead) ~ day + yday + date
-                   + reg0.id + reg0.name, ger_b, sum)
-ger_b <- ger_b[order(ger_b$reg0.id),]
-ger_b <- ger_b[order(ger_b$day),]
-# complete combinations of factors:
-df1 <- unique(ger_b[, c("day", "yday", "date")])
-df2 <- unique(ger_b[, c("reg0.id", "reg0.name")])
-df3 <- merge(df1, df2)
-ger_b <- merge(ger_b, df3, all=TRUE)
-ger_b[is.na(ger_b)] <- 0
-# add case statistics:
-for (id in ger_b$reg0.id) {
-  mask <- ger_b$reg0.id == id
-  ger_b$tot.cases[mask] <- cumsum(ger_b$new.cases[mask])
-} # add tot.cases
-for (id in ger_b$reg0.id) {
-  mask <- ger_b$reg0.id == id
-  ger_b$tot.dead[mask] <- cumsum(ger_b$new.dead[mask])
-} # add new.dead
-# reorder column names:
-ger_b <- ger_b[, c("day", "yday", "date",
-                   "reg0.id", "reg0.name",
-                   "tot.cases", "tot.dead",
-                   "new.cases", "new.dead")]
-write.csv(ger_b, file='./clean/data_ger_bundl.csv')
-
-## 2) region: "italy" - sub-regions: "regions" =================================
-italy_r_t <- read.csv('./dati_italia/dati-regioni/dpc-covid19-ita-regioni.csv')
-italy_r_t$date <- as_date(italy_r_t$data) # date in correct format
-italy_r_t$date <- date(italy_r_t$date)
-italy_r_t$yday <- yday(italy_r_t$date) # add yday
-italy_r_t$day <- italy_r_t$yday - min(italy_r_t$yday) # add day
-italy_r_t$reg0.name <- italy_r_t$denominazione_regione # rename
-# create reg0.id:
-reg_name <- sort(unique(italy_r_t$reg0.name))
-id_reg <- paste0('ita_', 1:length(reg_name))
-## 3) lookup table for italy and regions =======================================
-lookup_italy_regions <- data.frame(reg0.id = id_reg, reg0.name = reg_name)
-write.csv(lookup_italy_regions, file='./clean/lookup_italy_regions.csv')
-# merge:
-italy_r_t <- merge(italy_r_t, lookup_italy_regions)
-# reorder rows by day:
-italy_r_t <- italy_r_t[order(italy_r_t$day),]
-# add case statistics:
-italy_r_t$tot.cases <- italy_r_t$totale_casi # rename
-italy_r_t$tot.dead <- italy_r_t$deceduti # rename
-italy_r_t$tot.recovered <- italy_r_t$dimessi_guariti # rename
-for (id in id_reg) {
-  mask <- italy_r_t$reg0.id == id
-  italy_r_t$new.cases[mask] <- diff(c(0, italy_r_t$tot.cases[mask]))
-} # add new.cases
-for (id in id_reg) {
-  mask <- italy_r_t$reg0.id == id
-  italy_r_t$new.dead[mask] <- diff(c(0, italy_r_t$tot.dead[mask]))
-} # add new.dead
-for (id in id_reg) {
-  mask <- italy_r_t$reg0.id == id
-  italy_r_t$new.recovered[mask] <- diff(c(0, italy_r_t$tot.recovered[mask]))
-} # add new.recovered
-# reorder column names:
-italy_r_t <- italy_r_t[, c("day", "yday", "date",
-                           "reg0.id", "reg0.name",
-                           "tot.cases", "tot.dead", "tot.recovered",
-                           "new.cases", "new.dead", "new.recovered")]
-write.csv(italy_r_t, file='./clean/data_italy_regions.csv')
+lookup_world <- read.csv(file.path('./johns_hopkins/csse_covid_19_data/',
+                                   'UID_ISO_FIPS_LookUp_Table.csv'))
+lookup_world <- lookup_world[1:173, ]
+lookup_world <- unique(subset(lookup_world,
+                              select = c('iso3', 'Country_Region')))
+missing <- data.frame(iso3=c('CAN', 'AUS', 'CHN', 'USA'),
+                      Country_Region=c('Canada', 'Australia', 'China', 'US'))
+lookup_world <- merge(lookup_world, missing, all=TRUE)
+lookup_world <- lookup_world[-c(1,2),]
+names(lookup_world) <- c('reg0.id', 'reg0.name')
+write.csv(lookup_world, file='./clean/lookup_world_jh.csv', row.names=FALSE)
 ## =============================================================================
 
 
-## 2) region: "italy" - sub-regions: "provinces" ===============================
-italy_p_t <- read.csv('./dati_italia/dati-province/dpc-covid19-ita-province.csv')
-# remove "In fase di definizione/aggiornamento":
-italy_p_t <- italy_p_t[!grepl("In fase", italy_p_t$denominazione_provincia),]
-italy_p_t$date <- as_date(italy_p_t$data) # date in correct format
-italy_p_t$date <- date(italy_p_t$date)
-italy_p_t$yday <- yday(italy_p_t$date) # add yday
-italy_p_t$day <- italy_p_t$yday - min(italy_p_t$yday) # add day
-italy_p_t$reg1.name <- italy_p_t$denominazione_provincia # rename
-# create reg1.id:
-reg_province <- italy_p_t[,c("denominazione_regione",
-                             "denominazione_provincia")]
-names(reg_province) <- c("reg0.name", "reg1.name")
-reg_province <- unique(merge(reg_province, lookup_italy_regions))
-reg_name <- sort(unique(italy_p_t$reg1.name))
-reg_province$reg1.id <- paste0(reg_province$reg0.id, '_', 1:length(reg_name))
-## 3) lookup table italy for regions and provinces =============================
-lookup_italy_regions_provinces <- reg_province[, c("reg0.id", "reg0.name",
-                                                   "reg1.id", "reg1.name")]
-write.csv(lookup_italy_regions_provinces,
-          file='./clean/lookup_italy_regions_provinces.csv')
-# merge:
-#province_as_reg <- data.frame(reg1.id=lookup_italy_regions_provinces$reg1.id,
-#                              reg1.name=lookup_italy_regions_provinces$reg1.name)
-#italy_p_t <- merge(italy_p_t, province_as_reg, by='reg1.name')
-italy_p_t <- merge(italy_p_t, lookup_italy_regions_provinces)
-# reorder rows by day:
-italy_p_t <- italy_p_t[order(italy_p_t$day),]
+## 1) region: world; all data ==================================================
+#
+# Johns-Hopkins data
+#
+path <- './johns_hopkins/csse_covid_19_data/csse_covid_19_time_series/'
+world_cases <- read.csv(paste0(path,
+                               'time_series_covid19_confirmed_global.csv'))
+world_dead <- read.csv(paste0(path,
+                              'time_series_covid19_deaths_global.csv'))
+world_recovered <- read.csv(paste0(path,
+                                   'time_series_covid19_recovered_global.csv'))
+# date in correct format:
+dates <- tail(names(world_cases), -4)
+dates <- gsub('X', '', dates)
+dates <- parse_date_time(dates, orders='%m%d%y')
+# wide too long format:
+world_cases2 <- reshape(world_cases, varying=tail(names(world_cases), -4),
+                        direction = 'l', timevar = 'date',
+                        v.names = 'tot.cases', times = dates)[, -c(3, 4, 7)]
+world_dead2 <- reshape(world_dead, varying=tail(names(world_dead), -4),
+                       direction = 'l', timevar = 'date',
+                       v.names = 'tot.dead', times = dates)[, -c(3, 4, 7)]
+world_recovered2 <- reshape(world_recovered,
+                            varying=tail(names(world_recovered), -4),
+                            direction = 'l', timevar = 'date',
+                            v.names = 'tot.recovered',
+                            times = dates)[, -c(3, 4, 7)]
+world <- merge(merge(world_cases2, world_dead2, all=TRUE),
+               world_recovered2, all=TRUE)
+# reordering:
+world <- world[, c("date", "Country.Region", "Province.State",
+                   "tot.cases", "tot.dead", "tot.recovered")]
+# renaming:
+names(world) <- c("date", "reg0.name", "reg1.name",
+                  "tot.cases", "tot.dead", "tot.recovered")
+world$yday <- yday(world$date) # add yday
+world$day <- world$yday - min(world$yday) # add day
+world <- world[order(world$reg0.name),] # reorder
+world <- world[order(world$day),] # reorder
+# aggregating reg1:
+australia <- aggregate(cbind(tot.cases, tot.dead, tot.recovered)
+                       ~ day + yday + date + reg0.name,
+                       data=subset(world, reg0.name == 'Australia'), sum)
+australia$reg1.name <- ''
+world <- world[!(world$reg0.name == 'Australia'),] # remove australia
+world <- merge(world, australia, all=TRUE)
+canada <- aggregate(cbind(tot.cases, tot.dead)
+                    ~ day + yday + date + reg0.name,
+                    data=subset(world, reg0.name == 'Canada'
+                                       & reg1.name != ''), sum)
+canada2 <- aggregate(tot.recovered ~ day + yday + date + reg0.name,
+                     data=subset(world, reg0.name == 'Canada'
+                                        & reg1.name == ''), sum)
+canada$reg1.name <- ''
+canada <- merge(canada, canada2)
+world <- world[!(world$reg0.name == 'Canada'),] # remove canada
+world <- merge(world, canada, all=TRUE)
+china <- aggregate(cbind(tot.cases, tot.dead, tot.recovered)
+                   ~ day + yday + date + reg0.name,
+                   data=subset(world, reg0.name == 'China'), sum)
+china$reg1.name <- ''
+world <- world[!(world$reg0.name == 'China'),] # remove china
+world <- merge(world, china, all=TRUE)
+# removing colonies:
+world <- world[!(world$reg0.name == 'Denmark' & world$reg1.name != ''),]
+world <- world[!(world$reg0.name == 'France' & world$reg1.name != ''),]
+world <- world[!(world$reg0.name == 'Netherlands' & world$reg1.name != ''),]
+world <- world[!(world$reg0.name == 'United Kingdom' & world$reg1.name != ''),]
+# removing ships: Diamond Princess, MS Zaandam
+world <- world[!(world$reg0.name == 'Diamond Princess'),]
+world <- world[!(world$reg0.name == 'MS Zaandam'),]
+# add reg0.id:
+world <- merge(world, lookup_world)
+# reorder:
+world <- world[order(world$reg0.id),]
+world <- world[order(world$day),]
 # add case statistics:
-italy_p_t$tot.cases <- italy_p_t$totale_casi # rename
-for (id in italy_p_t$reg1.id) {
-  mask <- italy_p_t$reg1.id == id
-  italy_p_t$new.cases[mask] <- diff(c(0, italy_p_t$tot.cases[mask]))
+for (id in world$reg0.id) {
+  mask <- world$reg0.id == id
+  world$new.cases[mask] <- diff(c(0, world$tot.cases[mask]))
 } # add new.cases
-# reorder column names:
-italy_p_t <- italy_p_t[, c("day", "yday", "date",
-                           "reg0.id", "reg0.name", "reg1.id", "reg1.name",
-                           "tot.cases", "new.cases")]
-italy_p_t <- italy_p_t[order(italy_p_t$reg1.id),]
-italy_p_t <- italy_p_t[order(italy_p_t$reg0.id),]
-italy_p_t <- italy_p_t[order(italy_p_t$day),]
-write.csv(italy_p_t, file='./clean/data_italy_provinces.csv')
+for (id in world$reg0.id) {
+  mask <- world$reg0.id == id
+  world$new.dead[mask] <- diff(c(0, world$tot.dead[mask]))
+} # add new.dead
+for (id in world$reg0.id) {
+  mask <- world$reg0.id == id
+  world$new.recovered[mask] <- diff(c(0, world$tot.recovered[mask]))
+} # add new.recovered
+# reordering:
+world <- world[, c("day", "yday", "date",
+               "reg0.id", "reg0.name",
+               "tot.cases", "tot.dead", "tot.recovered",
+               "new.cases", "new.dead", "new.recovered")]
+#world <- world[order(world$reg0.id),]
+#world <- world[order(world$day),]
+write.csv(world, file='./clean/data_world_jh.csv', row.names=FALSE)

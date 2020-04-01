@@ -7,21 +7,119 @@ output: html_document
 library(lubridate, warn.conflicts = F)
 library(plotly, warn.conflicts = F)
 library(ggplot2, warn.conflicts = F)
+library(magrittr, warn.conflicts = F)
+library(dplyr, warn.conflicts = F)
 ```
 
 ```{r data, echo = F}
-germany <- read.csv("data/clean/data_ger_bundl.csv")
-italy <- read.csv("data/clean/data_italy_regions.csv")
+johns_hopkins <- read.csv("data/clean/data_world_jh.csv")
+#germany <- read.csv("data/clean/data_ger_bundl.csv")
 ```
 
 ```{r plots, echo = F, cache = F, message = F}
-make_plot <- function(df, country_name) {
-    ggplot(df, aes(x = ymd(date), y = tot.cases, color = reg0.name)) +
-        geom_line() +
+
+R.H <- function(
+    new.cases, # I
+    profile, # w
+    window = 1, # H
+    delay = 0, # Delta
+    conf.level = 0.95, # 1-alpha
+    pad.zeros = FALSE
+) {
+    # pad zeros if desired
+    if(pad.zeros) new.cases <- c(rep(0, length(profile) - 1), new.cases)
+
+    # compute convolutions over h, tau and both, respectively
+    sum.h.I <- as.numeric(stats::filter(new.cases, rep(1, window),
+        method = "convolution", sides = 1))
+    sum.tau.wI <- as.numeric(stats::filter(new.cases, c(0, profile),
+        method = "convolution", sides = 1))
+    sum.htau.wI <- as.numeric(stats::filter(sum.tau.wI, rep(1, window),
+        method = "convolution", sides = 1))
+
+    # estimators
+    RH <- sum.h.I / sum.htau.wI
+
+    # standard errors
+    RH.se <- sqrt(RH / sum.htau.wI)
+
+    # shift by delay
+    RH <- c(RH, rep(NA, delay))[(1:length(RH)) + delay]
+    RH.se <- c(RH.se, rep(NA, delay))[(1:length(RH.se)) + delay]
+
+    # standard normal qunatile
+    q <- qnorm(1 - (1-conf.level) / 2)
+
+    # return data.frame with as many rows as new.cases
+    ret <- data.frame(R.H = RH, R.H.se = RH.se,
+        R.H.lower = RH - q * RH.se, R.H.upper = RH + q * RH.se)
+    if(pad.zeros) ret[-(1:(length(profile)-1)),] else ret
+}
+
+infectivity <- c(0, .5, (1 - 1/6)^(0:21))
+names(infectivity) <- seq_along(infectivity)
+infectivity <- infectivity / sum(infectivity)
+
+width <- 2
+report.delay <- 7
+alpha <- 0.05
+
+make_plot <- function(country_name) {
+    country <- johns_hopkins %>%
+        filter(reg0.name == country_name) %>%
+        mutate(date = ymd(date))
+
+    estimates <- cbind(country, R.H(
+            new.cases = country$new.cases,
+            profile = infectivity,
+            window = width,
+            delay = report.delay,
+            conf.level = 1-alpha
+            ))
+
+    # estimate and subtract effect of weekday on a log-scale
+    # assuming constant proportion of under-/overreporting per weekday
+    #estimates$logRH <- log(estimates$R.H)
+    #estimates$logRH[is.infinite(estimates$logRH)] <- NA
+    #estimates$wday <- factor(wday(estimates$date))
+    #lm.wday <- lm(logRH ~ wday, estimates, weights = R.H / R.H.se)
+    #estimates$RH.wday <- exp(
+    #    estimates$logRH - predict(lm.wday, newdata = estimates) + mean(estimates$logRH, na.rm = TRUE)
+    #)
+
+    estimates <- estimates %>%
+        filter(!is.na(R.H), !is.na(R.H.lower), !is.na(R.H.upper)) %>%
+        filter(tot.cases > 20)
+
+    ggplot(estimates, aes(x = date, y = R.H)) +
+        geom_line(data = ~head(., -2), alpha = 1) +
+        geom_line(data = ~tail(., 3), alpha = .3, linetype = 2) +
+        # bug in ggplotly, so we have to split our lines into two pieces
+        # see https://github.com/tidyverse/ggplot2/issues/2006
+        geom_ribbon(
+            aes(ymin = R.H.lower, ymax = R.H.upper), 
+            alpha = 0.2,
+            data = ~head(., -2)
+            ) +
+        #geom_line(aes(y = RH.wday), data = ~head(., -2), color = "blue", size = 1.5) +
+        #geom_line(aes(y = RH.wday), data = ~tail(., 3), color = "blue", size = 1.5, alpha = .2) +
         theme_minimal() +
-        xlab("Date") + ylab("Total cases") +
-        labs(color = "Region") +
-        scale_y_log10()
+        scale_y_log10(limits = c(0.5, NA)) +
+        geom_hline(yintercept = c(1, 2.4), color = "red") +
+        geom_vline(
+            xintercept = as.numeric(
+                seq(ymd("2020-02-03"), by = "1 week", length.out = 100) - .5
+            ),
+            linetype = 3,
+            alpha = 0.6,
+            color = "blue"
+        ) +
+        labs(
+            title = paste0("Reproduction number for ", country_name, " over time"),
+            x = "day",
+            y = "R(t)"
+        )
+
     ggplotly()
 }
 
@@ -31,16 +129,29 @@ make_plot <- function(df, country_name) {
 
 Explation of what we do.
 
-### Germany
+<!--
+See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
+on generating tabs in rmarkdown automatically
+-->
+```{r, echo = F}
 
-```{r, echo = F, warning = F, fig.width = 10}
-make_plot(germany, "Germany")
+countries <- c("Germany", "Italy", "Spain", "US")
+names(countries) <- countries
+
+plots <- lapply(countries, make_plot)
+
+out <- lapply(seq_along(plots), function(i) {
+
+  a1 <- knitr::knit_expand(text = sprintf("### %s\n", countries[i])) # tab header, auto extracts names of `hcs`
+  a2 <- knitr::knit_expand(text = "\n```{r, echo = F}") # start r chunk
+  a3 <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i)) # extract graphs by "writing" out `hcs[[1]]`, `hcs[[2]]` etc. to be rendered later
+  a4 <- knitr::knit_expand(text = "\n```\n") # end r chunk
+
+  paste(a1, a2, a3, a4, collapse = '\n') # collapse together all lines with newline separator
+})
+
 ```
 
-### Italy
-
-```{r, echo = F, warning =F, fig.width = 10}
-make_plot(italy, "Italy")
-```
+`r paste(knitr::knit(text = paste(out, collapse = '\n')))`
 
 ##
