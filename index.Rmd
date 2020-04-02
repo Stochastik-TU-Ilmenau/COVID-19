@@ -81,7 +81,8 @@ make_plot <- function(country_name) {
             profile = infectivity,
             window = width,
             delay = report.delay,
-            conf.level = 1-alpha
+            conf.level = 1-alpha,
+            pad.zeros = TRUE
             ))
 
     # estimate and subtract effect of weekday on a log-scale
@@ -99,47 +100,40 @@ make_plot <- function(country_name) {
         filter(!is.na(R.H), !is.na(R.H.lower), !is.na(R.H.upper)) %>%
         filter(tot.cases > 30)
 
-    ggplot(estimates, aes(x = date, y = R.H)) +
-        geom_line(aes(color = "estimator"), data = ~head(., -2), alpha = 1, show.legend = TRUE) +
-        geom_line(aes(color = "estimator"), data = ~tail(., 3), alpha = .3, linetype = 2) +
+    first_monday <- ymd("2020-01-06")
+    p <- ggplot(estimates, aes(x = date, y = R.H)) +
+        geom_line() +
         # bug in ggplotly, so we have to split our lines into two pieces
         # see https://github.com/tidyverse/ggplot2/issues/2006
-        geom_ribbon(
-            aes(color = "estimator", ymin = R.H.lower, ymax = R.H.upper), 
-            alpha = 0.2,
-            data = ~head(., -2)
-            ) +
-        geom_line(aes(y = RH.wday, color = "remove weekday effect"), data = ~head(., -2)) +
-        geom_line(aes(y = RH.wday, color = "remove weekday effect"), data = ~tail(., 3), alpha = .2) +
-        scale_color_manual(
-            name = "",
-            values = c("estimator" = "black", "remove weekday effect" = "blue"),
-            labels = c("estimator", "remove weekday effect")
-            ) +
-        theme_bw() +
-        scale_y_log10() + # explicit ylim can lead to NaN
-        xlim(estimates$date[1], today()) +
+        geom_ribbon(aes(ymin = R.H.lower, ymax = R.H.upper), alpha = 0.2) +
+        #theme_bw() +
+        scale_y_log10(breaks = c(1:5, 7, 10)) +
+        scale_x_date(breaks = seq(first_monday, today(), by = "1 week"),
+            minor_breaks = "1 day",
+            date_labels = "%d/%m") +
+        # explicit ylim can lead to NaN
+        #xlim(estimates$date[1], today()) +
         geom_hline(
             yintercept = c(1.0), # R_0 = 2.5
             color = "red",
             linetype = "dotted",
             alpha = .5
             ) +
-        geom_vline(
-            xintercept = as.numeric(
-                seq(ymd("2020-02-03"), by = "1 week", length.out = 100) - .5
-            ),
-            linetype = "twodash",
-            alpha = 0.6,
-            color = "blue"
-        ) +
-        labs(
-            title = paste0("Reproduction number for ", country_name, " over time"),
+        #geom_vline(
+        #    xintercept = as.numeric(
+        #        seq(ymd("2020-02-03"), by = "1 week", length.out = 100) - .5
+        #    ),
+        #    linetype = "twodash",
+        #    alpha = 0.6,
+        #    color = "blue"
+        #) +
+        labs(title = paste0("Reproduction number for ", country_name, " over time"),
             x = "date",
             y = "R(t)"
-        )
+            ) 
+        
 
-    ggplotly()
+    ggplotly(p)
 }
 
 ```
@@ -152,7 +146,7 @@ Explanation of what we do.
 See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
 on generating tabs in rmarkdown automatically
 -->
-```{r, echo = F}
+```{r, echo = F, warning = F, message = F}
 
 maxday <- max(johns_hopkins$day)
 df <- subset(johns_hopkins, day == maxday, select = c(reg0.name, tot.cases))
