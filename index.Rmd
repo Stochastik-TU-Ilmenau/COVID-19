@@ -97,43 +97,52 @@ make_plot <- function(country_name) {
     )
 
     estimates <- estimates %>%
-        filter(!is.na(R.H), !is.na(R.H.lower), !is.na(R.H.upper)) %>%
         filter(tot.cases > 30)
 
     first_monday <- ymd("2020-01-06")
-    p <- ggplot(estimates, aes(x = date, y = R.H)) +
-        geom_line() +
-        # bug in ggplotly, so we have to split our lines into two pieces
-        # see https://github.com/tidyverse/ggplot2/issues/2006
-        geom_ribbon(aes(ymin = R.H.lower, ymax = R.H.upper), alpha = 0.2) +
-        #theme_bw() +
-        scale_y_log10(breaks = c(1:5, 7, 10)) +
-        scale_x_date(breaks = seq(first_monday, today(), by = "1 week"),
-            minor_breaks = "1 day",
-            date_labels = "%d/%m") +
-        # explicit ylim can lead to NaN
-        #xlim(estimates$date[1], today()) +
-        geom_hline(
-            yintercept = c(1.0), # R_0 = 2.5
-            color = "red",
-            linetype = "dotted",
-            alpha = .5
-            ) +
-        #geom_vline(
-        #    xintercept = as.numeric(
-        #        seq(ymd("2020-02-03"), by = "1 week", length.out = 100) - .5
-        #    ),
-        #    linetype = "twodash",
-        #    alpha = 0.6,
-        #    color = "blue"
-        #) +
-        labs(title = paste0("Reproduction number for ", country_name, " over time"),
-            x = "date",
-            y = "R(t)"
-            ) 
-        
-
-    ggplotly(p)
+    plot_ly(estimates, x= ~date, y= ~R.H) %>%
+        add_bars(y = ~new.cases, yaxis = "y2", opacity = .3, name = "new cases") %>%
+        add_lines(name = "R(t)") %>%
+        add_ribbons(ymin = ~R.H.lower, ymax = ~R.H.upper, opacity = .5, name = "confidence sets") %>%
+        layout(
+            shapes = list(
+                list(
+                    type = "line",
+                    x0 = 0, x1 = 1,
+                    xref = "paper",
+                    y0 = 1, y1 = 1,
+                    line = list(color = "red", dash = "dot")
+                    ),
+                list(
+                    type = "line",
+                    x0 = 0, x1 = 1,
+                    xref = "paper",
+                    y0 = 2.4, y1 = 2.4,
+                    line = list(color = "red", dash = "dot")
+                )
+                ),
+            yaxis = list(
+                type = "log", 
+                title = "R(t)",
+                tickmode = "array",
+                tickvals = 1:10,
+                range = log(c(min(c(0.3, estimates$R.H.lower), na.rm = TRUE), 10), base = 10)
+                ),
+            colorway = c("blue", "black", "grey"),
+            yaxis2 = list(
+                overlaying = "y",
+                side = "right",
+                title = "new cases"
+                ),
+            xaxis =  list(
+                ticks = "outside",
+                tickvals = seq(first_monday, today(), by = "1 day"),
+                showline = TRUE,
+                showgrid = TRUE,
+                type = "date",
+                tickformat = "%d-%m"
+            )
+        ) 
 }
 
 ```
