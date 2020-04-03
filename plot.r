@@ -21,7 +21,8 @@ plot_repronum <- function(estimates, country_name) {
             yaxis2 = list(
                 overlaying = "y",
                 side = "right",
-                title = "new cases"
+                title = "new cases",
+                fixedrange = TRUE
                 ),
             xaxis =  list(
                 ticks = "outside",
@@ -38,6 +39,6 @@ plot_repronum <- function(estimates, country_name) {
                 bgcolor = "#FFFFFF00",
                 orientation = "h"
                 ),
-            margin = list(r = 60)
+            margin = list(r = 60, t = 100)
         )
 }
