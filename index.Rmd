@@ -181,7 +181,10 @@ out <- lapply(seq_along(plots), function(i) {
 
 `r paste(knitr::knit(text = paste(out, collapse = '\n')))`
 
+##
+
 Explanations (see the [Technical Report]() for details):
+
 - We estimate the **reproduction rate** $R(t)$ at day $t$, i.e. the average number of people someone infected at time $t$ would infect if conditions remained the same.
 - The estimator has been taken from [(Fraser 2007)][1] with (asymptotic) 95% confidence intervals derived using the delta method.
 - Estimates and confidence intervals are shown in black, corresponding to the left axis (on a log-scale).
@@ -196,5 +199,3 @@ Explanations (see the [Technical Report]() for details):
 
 [1]: Fraser, C. (2007). *Estimating Individual and Household Reproduction
 Numbers in an Emerging Epidemic.* PLOS ONE 2 (8), [https://doi.org/10.1371/journal.pone.0000758](https://doi.org/10.1371/journal.pone.0000758).
-
-##
