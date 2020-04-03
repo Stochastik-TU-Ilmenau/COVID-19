@@ -1,5 +1,5 @@
 ---
-title: 'Schätzer für Deutschland basierend auf RKI daten'
+title: 'Schätzer für Deutschland basierend auf RKI Daten'
 output: html_document
 ---
 
@@ -23,6 +23,9 @@ germany <- read.csv("data/clean/data_ger_bundl.csv")
 ```
 
 ## {.tabset .tabset-fade}
+
+[zurück](index.html)
+
 <!--
 See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
 on generating tabs in rmarkdown automatically
@@ -35,7 +38,7 @@ ger <- aggregate(cbind(tot.cases, tot.dead, new.cases, new.dead)
 ger$reg0.name <- "Deutschland"
 germany <- merge(ger, germany, all=TRUE)
 
-# tabs for Bundeslaender sorted by tot.cases
+# tabs for Bundeslaender (and all Germany) sorted by tot.cases
 maxday <- max(germany$day)
 regions <- subset(germany, day == maxday, select = c(reg0.name, tot.cases))
 regions <- regions[rev(order(regions$tot.cases)),]
@@ -59,23 +62,6 @@ plots <- lapply(regions, function(country_name) {
     plot_repronum(estimates, country_name)
 })
 
-# tab for all germany
-# ger <- aggregate(cbind(tot.cases, tot.dead, new.cases, new.dead)
-#                  ~ day + yday + date, germany, sum)
-# ger$date <- ymd(ger$date)
-# estimates <- cbind(ger, repronum(
-#             new.cases = ger$new.cases,
-#             profile = infectivity,
-#             window = width,
-#             delay = report.delay,
-#             conf.level = 1 - alpha,
-#             pad.zeros = TRUE
-#             ))
-# plot_ger <- plot_repronum(estimates, "Deutschland")
-# 
-# plots <- c(plot_ger, plots)
-# names <- c(Deutschland="Deutschland", bundl)
-
 out <- lapply(seq_along(plots), function(i) {
   a1 <- knitr::knit_expand(text = sprintf("### %s\n", regions[i])) # tab header, auto extracts names of `hcs`
   a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10}") # start r chunk
@@ -90,19 +76,22 @@ out <- lapply(seq_along(plots), function(i) {
 
 ##
 
-Explanations (see the [Technical Report]() for details):
+Erklärung (siehe [Technical Report]() für eine detaillierte Beschreibung):
 
-- We estimate the **reproduction rate** $R(t)$ at day $t$, i.e. the average number of people someone infected at time $t$ would infect if conditions remained the same.
-- The estimator has been taken from [(Fraser 2007)][1] with (asymptotic) 95% confidence intervals derived using the delta method.
-- Estimates and confidence intervals are shown in black, corresponding to the left axis (on a log-scale).
-- The **critical value** for the reproduction number is $1$, shown as a red horizontal line: a value larger than one results in an exponential increase of infections, a value smaller than one in a decrease.
-- The analysis is based on *newly reported cases* per day, shown as blue bars corresponding to the right axis (on a linear scale).
-- We use the data provided by [Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19), updating our graphics daily.
-- Note that cases are reported much later than the corresponding day of infection, namely after incubation time and some more days necessary for testing and reporting the case to the authorities. For simplicity we assume that cases are reported 7 days after infection.
-- In a population where no countermeasures have been put into place, the reproduction number is believed to be given by some value between 2.4 and 3.3. Estimates higher than that may be explained by a large number of imported cases before the day being considered.
-- Since the estimator is based on assumptions about the infectivity of the virus, and given that the data are not perfect because of a change of reporting criteria, the amount of testing etc., the estimates should be cautiously interpreted and not be taken at face value. However, we believe one can draw qualitatively correct conclusions from them.
+- Wir schätzen die **Reproduktionsrate**  *R(t)* am Tag *t*, d. h. die durchschnittliche Anzahl von Menschen die jemand, der am Tag *t* infiziert wurde, infizieren würde, wenn die Bedingungen gleich bleiben würden.
+- Der Schätzer wurde aus [(Fraser 2007)](#ref1) entnommen. Er vergleicht die Anzahl der Infektionen zu einem Zeitpunkt mit der Anzahl der infektiösen Fälle zu dieser Zeit gewichtet mit ihrer Infektivität.
+- Für den Schätzer wurden (approximative, punktweise) **95% Konfidenzintervalle**, mit Hilfe der Delta-Methode, berechnet.
+- **Warnung:** die Größe der Konfidenzintervalle spiegelt nur die statistische Unsicherheit wider, welche durch die zufällige Dynamik der Epidemie bedingt ist. Die obigen Schätzungen sollten vorsichtig interpretiert werden, da der Schätzer auf bestimmten Annahmen über die Infektivität des Virus basiert, zudem muss die Ungenauigkeit der zugrundeliegenden Daten beachtet werden, welche durch den Meldeablauf, die Anzahl der durchgeführten Tests etc. Speziell bei den RKI Daten wird das durch einen ausgeprägten Wochentagseffekt deutlich. Dennoch glauben wir daran, dass sich qualitative Aussagen ableiten lassen.
+- Der Code steht [hier](https://github.com/Stochastik-TU-Ilmenau/COVID-19/blob/gh-pages/estimator.r) zur Verfügung.
+- Der Schätzer wird in Schwarz angezeigt, Konfidenzbereiche als graue Streifen, wobei die Werte der (logarithmischen) Skala der linken Achse entsprechen.
+- Der **kritische Wert** für die Reproduktionsrate ist **1**, angezeigt als horizontale Linie: ein Wert größer als Eins würde in einem exponentiellen Anstieg der Infektionen resultieren, ein kleinerer als Eins zu einem Abfallen.
+- Die Analyse basiert auf den **neu gemeldeten Fällen** der Coronavirus-Krankheit 2019 (COVID-19) pro Tag, angezeigt als blaue Säulen passend zur (linearen) Skala der rechten Achse. Die [Daten](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0) stammen vom [Robert Koch-Institut](rki.de).
+- Die Grafiken werden Täglich<!-- at 2:00 GMT--> aktualisiert und zeigen den Datenstand bis gestern 
+- Zu beachten ist weiterhin, dass das Meldedatum der Fälle wesentlich später ist als das tatsächliche Infektionsdatum (Inkubationszeit, Durchführung der Tests und Meldung an die Behörden). Der Einfachheit halber gehen wir hier von einer Meldeverzögerung von 7 Tagen nach Infektion aus. Deswegen wird auch die Schätzung der Reproduktionsrate zeitversetzt zu den gemeldeten Fällen angezeigt!
+- In einer Population in der keine Gegenmaßnahmen unternommen werden, wird die Reproduktionsrate des Coronavirus auf 2,4 bis 3,3 geschätzt. Schätzungen mit höheren Werten könnten dadurch erklärt werden, dass für eine bestimmte Region zu Beginn die meisten Fälle von außerhalb importiert wurden.
 
-### References ###
 
-[1]: Fraser, C. (2007). *Estimating Individual and Household Reproduction
+### Referenzen ###
+
+<a name="ref1">[1]</a>: Fraser, C. (2007). *Estimating Individual and Household Reproduction
 Numbers in an Emerging Epidemic.* PLOS ONE 2 (8), [https://doi.org/10.1371/journal.pone.0000758](https://doi.org/10.1371/journal.pone.0000758).
