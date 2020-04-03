@@ -10,6 +10,9 @@ library(ggplot2, warn.conflicts = F)
 library(magrittr, warn.conflicts = F)
 library(dplyr, warn.conflicts = F)
 Sys.setlocale('LC_TIME', 'C')
+source("plot.r")
+source("estimator.r")
+
 ```
 
 ```{r data, echo = F}
@@ -18,132 +21,6 @@ johns_hopkins <- read.csv("data/clean/data_world_jh.csv")
 ```
 
 ```{r plots, echo = F, cache = F, message = F}
-
-R.H <- function(
-    new.cases, # I
-    profile, # w
-    window = 1, # H
-    delay = 0, # Delta
-    conf.level = 0.95, # 1-alpha
-    pad.zeros = FALSE
-) {
-    # pad zeros if desired
-    if(pad.zeros) new.cases <- c(rep(0, length(profile) - 1), new.cases)
-
-    # compute convolutions over h, tau and both, respectively
-    sum.h.I <- as.numeric(stats::filter(new.cases, rep(1, window),
-        method = "convolution", sides = 1))
-    sum.tau.wI <- as.numeric(stats::filter(new.cases, c(0, profile),
-        method = "convolution", sides = 1))
-    sum.htau.wI <- as.numeric(stats::filter(sum.tau.wI, rep(1, window),
-        method = "convolution", sides = 1))
-
-    # estimators
-    RH <- sum.h.I / sum.htau.wI
-
-    # standard errors
-    RH.se <- sqrt(RH / sum.htau.wI)
-
-    # shift by delay
-    RH <- c(RH, rep(NA, delay))[(1:length(RH)) + delay]
-    RH.se <- c(RH.se, rep(NA, delay))[(1:length(RH.se)) + delay]
-
-    # standard normal qunatile
-    q <- qnorm(1 - (1-conf.level) / 2)
-
-    # return data.frame with as many rows as new.cases
-    ret <- data.frame(R.H = RH, R.H.se = RH.se,
-        R.H.lower = RH - q * RH.se, R.H.upper = RH + q * RH.se)
-    if(pad.zeros) ret[-(1:(length(profile)-1)),] else ret
-}
-
-# geometric decay:
-#infectivity <- c(0, .5, (1 - 1/6)^(0:21))
-#names(infectivity) <- seq_along(infectivity)
-#infectivity <- infectivity / sum(infectivity)
-# more realistic:
-infectivity <- c((0:3)/3, 1, (5:0)/5)
-names(infectivity) <- seq_along(infectivity)
-infectivity <- infectivity / sum(infectivity)
-
-
-width <- 2
-report.delay <- 7
-alpha <- 0.05
-
-make_plot <- function(country_name) {
-    country <- johns_hopkins %>%
-        filter(reg0.name == country_name) %>%
-        mutate(date = ymd(date))
-
-    estimates <- cbind(country, R.H(
-            new.cases = country$new.cases,
-            profile = infectivity,
-            window = width,
-            delay = report.delay,
-            conf.level = 1-alpha,
-            pad.zeros = TRUE
-            ))
-
-    # estimate and subtract effect of weekday on a log-scale
-    # assuming constant proportion of under-/overreporting per weekday
-    estimates$logRH <- log(estimates$R.H)
-    estimates$logRH[is.infinite(estimates$logRH)] <- NA
-    estimates$wday <- factor(wday(estimates$date))
-    lm.wday <- lm(logRH ~ wday, estimates, weights = R.H / R.H.se)
-    lm.inter <- lm(logRH ~ 1, estimates, weights = R.H / R.H.se)
-    estimates$RH.wday <- exp(
-        estimates$logRH - predict(lm.wday, newdata = estimates) + predict(lm.inter, newdata = estimates)
-    )
-
-    estimates <- estimates %>%
-        filter(tot.cases > 30)
-
-    first_monday <- ymd("2020-01-06")
-    plot_ly(estimates, x= ~date, y= ~R.H) %>%
-        add_bars(y = ~new.cases, yaxis = "y2", opacity = .3, name = "new cases") %>%
-        add_lines(name = "R(t)") %>%
-        add_ribbons(ymin = ~R.H.lower, ymax = ~R.H.upper, opacity = .5, name = "confidence sets") %>%
-        layout(
-            shapes = list(
-                list(
-                    type = "line",
-                    x0 = 0, x1 = 1,
-                    xref = "paper",
-                    y0 = 1, y1 = 1,
-                    line = list(color = "red", dash = "dot")
-                    )#,
-#                list(
-#                    type = "line",
-#                    x0 = 0, x1 = 1,
-#                    xref = "paper",
-#                    y0 = 2.4, y1 = 2.4,
-#                    line = list(color = "red", dash = "dot")
-#                )
-                ),
-            yaxis = list(
-                type = "log",
-                title = "R(t)",
-                tickmode = "array",
-                tickvals = 1:10,
-                range = log(c(min(c(0.3, estimates$R.H.lower), na.rm = TRUE), 10), base = 10)
-                ),
-            colorway = c("blue", "black", "grey"),
-            yaxis2 = list(
-                overlaying = "y",
-                side = "right",
-                title = "new cases"
-                ),
-            xaxis =  list(
-                ticks = "outside",
-                tickvals = seq(first_monday, today(), by = "1 day"),
-                showline = TRUE,
-                showgrid = TRUE,
-                type = "date",
-                tickformat = "%d-%m"
-            )
-        )
-}
 
 ```
 
@@ -165,7 +42,22 @@ countries <- df$reg0.name[1:21]
 #countries <- c("Germany", "Italy", "Spain", "France", "Switzerland", "Netherlands", "Austria", "United Kingdom", "Korea, South", "US")
 names(countries) <- countries
 
-plots <- lapply(countries, make_plot)
+plots <- lapply(countries, function(country_name) {
+    country <- johns_hopkins %>%
+        filter(reg0.name == country_name) %>%
+        mutate(date = ymd(date))
+
+    estimates <- cbind(country, repronum(
+            new.cases = country$new.cases,
+            profile = infectivity,
+            window = width,
+            delay = report.delay,
+            conf.level = 1 - alpha,
+            pad.zeros = TRUE
+        ))
+    
+    plot_repronum(estimates, country_name)
+})
 
 out <- lapply(seq_along(plots), function(i) {
 
