@@ -1,18 +1,38 @@
-plot_repronum <- function(estimates, country_name) {
+plot_repronum <- function(estimates, country_name, language) {
     estimates <- estimates %>%
         filter(tot.cases > 30)
 
+    strings <- list(
+        en = list(
+            repno = "reproduction number",
+            ci = "95% confidence interval",
+            new_cases = "newly reported cases",
+            title = "Estimated reproduction number / newly reported cases",
+            date = "date"
+        ),
+        de = list(
+            repno = "Reproduktionszahl",
+            ci = "95% Konfidenzintervall",
+            new_cases = "neu gemeldete Fälle",
+            title = "Geschätzte Reproduktionszahl / neu gemeldete Fälle",
+            date = "Datum"
+        )
+    )
+
+    translations <- strings[[language]]
+    
+
     first_monday <- ymd("2020-01-06")
     plot_ly(estimates, x= ~date, y= ~repronum) %>%
-        add_lines(name = "reproduction number") %>%
-        add_ribbons(ymin = ~ci.lower, ymax = ~ci.upper, opacity = .5, name = "95% confidence interval") %>%
+        add_lines(name = translations$repno) %>%
+        add_ribbons(ymin = ~ci.lower, ymax = ~ci.upper, opacity = .5, name = translations$ci) %>%
         add_lines(y = ~1, name = "R = 1", opacity = .3, line = list(dash = "dash")) %>%
-        add_bars(y = ~new.cases, yaxis = "y2", opacity = .1, name = "newly reported cases") %>%
+        add_bars(y = ~new.cases, yaxis = "y2", opacity = .1, name = translations$new_cases) %>%
         layout(
-            title = "Estimated reproduction number / reported cases",
+            title = translations$title,
             yaxis = list(
                 type = "log",
-                title = "reproduction rate",
+                title = translations$repno,
                 tickmode = "array",
                 tickvals = 1:10,
                 range = log(c(min(c(0.3, estimates$ci.lower), na.rm = TRUE), 10), base = 10)
@@ -21,7 +41,7 @@ plot_repronum <- function(estimates, country_name) {
             yaxis2 = list(
                 overlaying = "y",
                 side = "right",
-                title = "new cases",
+                title = translations$new_cases,
                 fixedrange = TRUE
                 ),
             xaxis =  list(
@@ -30,7 +50,8 @@ plot_repronum <- function(estimates, country_name) {
                 showline = TRUE,
                 showgrid = TRUE,
                 type = "date",
-                tickformat = "%d/%m"
+                tickformat = "%d/%m",
+                title = translations$date
                 ),
             legend = list(
                 x = 0.2,

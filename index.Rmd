@@ -66,7 +66,7 @@ plots <- lapply(countries, function(country_name) {
             pad.zeros = TRUE
         ))
 
-    plot_repronum(estimates, country_name)
+    plot_repronum(estimates, country_name, language = "en")
 })
 
 out <- lapply(seq_along(plots), function(i) {
