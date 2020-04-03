@@ -39,6 +39,19 @@ plot_repronum <- function(estimates, country_name) {
                 bgcolor = "#FFFFFF00",
                 orientation = "h"
                 ),
-            margin = list(r = 60, t = 100)
+            margin = list(r = 60, t = 100),
+            shapes = lapply(seq(min(estimates$date), today(), by = "1 day"), function (day) {
+                list(
+                    type = "line",
+                    y0 = 0,
+                    y1 = 1,
+                    yref = "paper",
+                    x0 = day,
+                    x1 = day,
+                    line = list(color = "#eee", width = 1),
+                    layer = "below"
+                )
+            })
+
         )
 }
