@@ -20,10 +20,6 @@ johns_hopkins <- read.csv("data/clean/data_world_jh.csv")
 #germany <- read.csv("data/clean/data_ger_bundl.csv")
 ```
 
-```{r plots, echo = F, cache = F, message = F}
-
-```
-
 ## {.tabset .tabset-fade}
 
 Created by [AG Stochastik](https://www.tu-ilmenau.de/stochastik/), [Technische Universität Ilmenau](https://www.tu-ilmenau.de/) in collaboration with [Prof. Dr. A. Krämer](https://ekvv.uni-bielefeld.de/pers_publ/publ/PersonDetail.jsp?personId=21463&lang=de), [School of Public Health](https://www.uni-bielefeld.de/gesundhw/index.html), [Universität Bielefeld](https://www.uni-bielefeld.de/).
