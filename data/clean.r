@@ -26,6 +26,8 @@ library(lubridate, warn.conflicts=FALSE)
 #
 ## =============================================================================
 
+
+## 3) # create lookup table for world ==========================================
 lookup_world <- read.csv(file.path('./johns_hopkins/csse_covid_19_data/',
                                    'UID_ISO_FIPS_LookUp_Table.csv'))
 lookup_world <- lookup_world[1:173, ]
@@ -137,3 +139,94 @@ world <- world[, c("day", "yday", "date",
 #world <- world[order(world$reg0.id),]
 #world <- world[order(world$day),]
 write.csv(world, file='./clean/data_world_jh.csv', row.names=FALSE)
+## =============================================================================
+
+
+## 1) region: germany; all data ================================================
+#
+# this data.frame does NOT contain ALL combinations of factors !
+# and they are not completed either since too many combinations...
+# all combinations only in derived data frames (see below)
+#
+ger <- read.csv('./rki_data/RKI_COVID19.csv')
+# subsetting and reordering: (ignore "Datenstand" and "ObjectId")
+ger <- subset(ger, select=c("Meldedatum", "IdBundesland", "Bundesland",
+                            "IdLandkreis", "Landkreis", "AnzahlFall",
+                            "AnzahlTodesfall", "Altersgruppe", "Geschlecht"))
+ger <- ger[!(ger$IdBundesland == -1),] # remove "-nicht erhoben-"
+ger$AnzahlFall[ger$AnzahlFall < 0] <- 0 # set negatives to 0
+ger$AnzahlTodesfall[ger$AnzahlTodesfall < 0] <- 0 # set negatives to 0
+# renaming:
+names(ger) <- c("date", "reg0.id", "reg0.name", "reg1.id", "reg1.name",
+                "new.cases", "new.dead", "age", "sex")
+ger$date <- as_date(ger$date) # date in correct format
+ger$yday <- yday(ger$date) # add yday
+ger$day <- ger$yday - min(ger$yday) # add day
+ger <- ger[order(ger$day),] # reorder
+# for derived data frames additonal case statistics (tot.cases, ...) are added;
+# here too many combinations of factors make this impractical !
+# reordering:
+ger <- ger[, c("day", "yday", "date",
+               "reg0.id", "reg0.name", "reg1.id", "reg1.name",
+               "new.cases", "new.dead",
+               "age", "sex")]
+write.csv(ger, file='./clean/data_ger_all.csv', row.names=FALSE)
+## 3) # create lookup table for ger all ========================================
+lookup_ger <- subset(ger, select=c("reg0.id", "reg0.name",
+                                   "reg1.id", "reg1.name"))
+lookup_ger <- unique(lookup_ger[order(lookup_ger$reg0.id),])
+write.csv(lookup_ger, file='./clean/lookup_ger_all.csv', row.names=FALSE)
+## =============================================================================
+
+
+## 3) # create lookup table for ger bundl ======================================
+lookup_ger_bundl <- subset(ger, select=c("reg0.id", "reg0.name"))
+lookup_ger_bundl <- unique(lookup_ger_bundl[order(lookup_ger_bundl$reg0.id),])
+codes <- data.frame(reg0.id=1:16,
+                    reg0.id=c('SH', 'HH', 'NI', 'HB', 'NW', 'HE', 'RP', 'BW',
+                              'BY', 'SL', 'BE', 'BB', 'MV', 'SN', 'ST', 'TH'))
+lookup_ger_bundl <- merge(lookup_ger_bundl, codes)
+write.csv(lookup_ger_bundl,
+          file='./clean/lookup_ger_bundl.csv', row.names=FALSE)
+## =============================================================================
+
+
+## 2) region: "Deutschland" - sub-regions: "Bundeslaender" =====================
+ger_b <- read.csv('./clean/data_ger_all.csv')
+ger_b <- aggregate(cbind(new.cases, new.dead) ~ day + yday + date
+                   + reg0.id + reg0.name, ger_b, sum)
+# replace numerical ids with codes from lookup:
+ger_b <- merge(ger_b, lookup_ger_bundl)
+ger_b$reg0.id <- ger_b$reg0.id.1
+ger_b$reg0.id.1 <- NULL
+#ger_b <- ger_b[order(ger_b$reg0.id),]
+#ger_b <- ger_b[order(ger_b$day),]
+# complete combinations of factors:
+#df1 <- unique(ger_b[, c("day", "yday", "date")])
+ger_b$date <- as_date(ger_b$date)
+dates <- seq(min(ger_b$date), max(ger_b$date), by = '1 day')
+df1 <- data.frame(day=seq_along(dates)-1, yday=yday(dates), date=dates)
+df2 <- unique(ger_b[, c("reg0.id", "reg0.name")])
+df3 <- merge(df1, df2)
+#df3$date <- as.factor(df3$date)
+ger_b <- merge(ger_b, df3, all=TRUE)
+ger_b[is.na(ger_b)] <- 0
+# order by reg0 and date:
+ger_b <- ger_b[order(ger_b$reg0.id),]
+ger_b <- ger_b[order(ger_b$day),]
+# add case statistics:
+for (id in ger_b$reg0.id) {
+  mask <- ger_b$reg0.id == id
+  ger_b$tot.cases[mask] <- cumsum(ger_b$new.cases[mask])
+} # add tot.cases
+for (id in ger_b$reg0.id) {
+  mask <- ger_b$reg0.id == id
+  ger_b$tot.dead[mask] <- cumsum(ger_b$new.dead[mask])
+} # add new.dead
+# reorder column names:
+ger_b <- ger_b[, c("day", "yday", "date",
+                   "reg0.id", "reg0.name",
+                   "tot.cases", "tot.dead",
+                   "new.cases", "new.dead")]
+write.csv(ger_b, file='./clean/data_ger_bundl.csv', row.names=FALSE)
+## =============================================================================

@@ -1,0 +1,85 @@
+---
+title: 'All countries with over 100 cases (alphabetical order)'
+output: html_document
+---
+
+```{r libraries, echo = F, message = F, warning = F, results='hide'}
+library(lubridate, warn.conflicts = F)
+library(plotly, warn.conflicts = F)
+library(ggplot2, warn.conflicts = F)
+library(magrittr, warn.conflicts = F)
+library(dplyr, warn.conflicts = F)
+Sys.setlocale('LC_TIME', 'C')
+source("plot.r")
+source("estimator.r")
+```
+
+```{r data, echo = F}
+johns_hopkins <- read.csv("data/clean/data_world_jh.csv")
+```
+
+```{r plots, echo = F, cache = F, message = F}
+
+```
+
+## {.tabset .tabset-fade}
+<!--
+See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
+on generating tabs in rmarkdown automatically
+-->
+```{r, echo = F, warning = F, message = F}
+
+maxday <- max(johns_hopkins$day)
+df <- subset(johns_hopkins, day == maxday, select = c(reg0.name, tot.cases))
+df <- df[order(df$reg0.name),]
+countries <- df$reg0.name[df$tot.cases > 100]
+names(countries) <- countries
+
+plots <- lapply(countries, function(country_name) {
+    country <- johns_hopkins %>%
+        filter(reg0.name == country_name) %>%
+        mutate(date = ymd(date))
+
+    estimates <- cbind(country, repronum(
+            new.cases = country$new.cases,
+            profile = infectivity,
+            window = width,
+            delay = report.delay,
+            conf.level = 1 - alpha,
+            pad.zeros = TRUE
+        ))
+    
+    plot_repronum(estimates, country_name)
+})
+
+out <- lapply(seq_along(plots), function(i) {
+
+  a1 <- knitr::knit_expand(text = sprintf("### %s\n", countries[i])) # tab header, auto extracts names of `hcs`
+  a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10}") # start r chunk
+  a3 <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i)) # extract graphs by "writing" out `hcs[[1]]`, `hcs[[2]]` etc. to be rendered later
+  a4 <- knitr::knit_expand(text = "\n```\n") # end r chunk
+
+  paste(a1, a2, a3, a4, collapse = '\n') # collapse together all lines with newline separator
+})
+```
+
+`r paste(knitr::knit(text = paste(out, collapse = '\n')))`
+
+##
+
+Explanations (see the [Technical Report]() for details):
+
+- We estimate the **reproduction rate** $R(t)$ at day $t$, i.e. the average number of people someone infected at time $t$ would infect if conditions remained the same.
+- The estimator has been taken from [(Fraser 2007)][1] with (asymptotic) 95% confidence intervals derived using the delta method.
+- Estimates and confidence intervals are shown in black, corresponding to the left axis (on a log-scale).
+- The **critical value** for the reproduction number is $1$, shown as a red horizontal line: a value larger than one results in an exponential increase of infections, a value smaller than one in a decrease.
+- The analysis is based on *newly reported cases* per day, shown as blue bars corresponding to the right axis (on a linear scale).
+- We use the data provided by [Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19), updating our graphics daily.
+- Note that cases are reported much later than the corresponding day of infection, namely after incubation time and some more days necessary for testing and reporting the case to the authorities. For simplicity we assume that cases are reported 7 days after infection.
+- In a population where no countermeasures have been put into place, the reproduction number is believed to be given by some value between 2.4 and 3.3. Estimates higher than that may be explained by a large number of imported cases before the day being considered.
+- Since the estimator is based on assumptions about the infectivity of the virus, and given that the data are not perfect because of a change of reporting criteria, the amount of testing etc., the estimates should be cautiously interpreted and not be taken at face value. However, we believe one can draw qualitatively correct conclusions from them.
+
+### References ###
+
+[1]: Fraser, C. (2007). *Estimating Individual and Household Reproduction
+Numbers in an Emerging Epidemic.* PLOS ONE 2 (8), [https://doi.org/10.1371/journal.pone.0000758](https://doi.org/10.1371/journal.pone.0000758).

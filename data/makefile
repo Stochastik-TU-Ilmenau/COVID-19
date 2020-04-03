@@ -1,10 +1,14 @@
-all: johns_hopkins clean_data
+all: johns_hopkins get_rki clean_data
 
-.PHONY: johns_hopkins clean_data clean
+.PHONY: johns_hopkins get_rki clean_data clean
 
 johns_hopkins:
 	if [ ! -d johns_hopkins ] ; then  git clone https://github.com/CSSEGISandData/COVID-19 johns_hopkins; fi
 	cd johns_hopkins; git pull origin master
+
+get_rki:
+	mkdir -p rki_data
+	cd rki_data; wget -O RKI_COVID19.csv https://opendata.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0.csv
 
 clean_data:
 	mkdir -p clean
