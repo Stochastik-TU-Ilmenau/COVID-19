@@ -22,7 +22,21 @@ johns_hopkins <- read.csv("data/clean/data_world_jh.csv")
 
 ## {.tabset .tabset-fade}
 
-Created by [AG Stochastik](https://www.tu-ilmenau.de/stochastik/), [Technische Universität Ilmenau](https://www.tu-ilmenau.de/) in collaboration with [Prof. Dr. A. Krämer](https://ekvv.uni-bielefeld.de/pers_publ/publ/PersonDetail.jsp?personId=21463&lang=de), [School of Public Health](https://www.uni-bielefeld.de/gesundhw/index.html), [Universität Bielefeld](https://www.uni-bielefeld.de/).
+Created by
+[Prof. Dr. Thomas Hotz](https://www.tu-ilmenau.de/stochastik/team/thomas-hotz/),
+[Stefan Heyder](https://www.tu-ilmenau.de/stochastik/team/stefan-heyder/),
+[Matthias Glock](https://www.tu-ilmenau.de/stochastik/team/matthias-glock/)
+and [Sebastian Semper](https://www.tu-ilmenau.de/stochastik/team/sebastian-semper/)
+of the
+*[AG Stochastik](https://www.tu-ilmenau.de/stochastik/), [Technische Universität Ilmenau](https://www.tu-ilmenau.de/)*
+<br/>
+in collaboration with
+[Prof. Dr. Alexander Krämer](https://ekvv.uni-bielefeld.de/pers_publ/publ/PersonDetail.jsp?personId=21463&lang=de)
+and
+[Anne Böhle](anne.boehle@uni-bielefeld.de)
+of the
+*[School of Public Health](https://www.uni-bielefeld.de/gesundhw/index.html), [Bielefeld University](https://www.uni-bielefeld.de/)*.
+
 
 <!--
 See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
