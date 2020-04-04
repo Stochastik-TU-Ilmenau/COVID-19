@@ -11,5 +11,8 @@ RKI.html: RKI.Rmd
 all.html: all.Rmd
 	Rscript -e "rmarkdown::render('all.Rmd')"
 
+dependencies: install_dependencies.r
+	Rscript install_dependencies.r
+
 #index.Rmd: data/clean/data_ger_bundl.csv
 	#cd data; make all

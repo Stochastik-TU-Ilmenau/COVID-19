@@ -1,6 +1,12 @@
+library(plotly)
+library(magrittr)
+library(lubridate)
+
+mincases <- 30
+
 plot_repronum <- function(estimates, country_name, language) {
     estimates <- estimates %>%
-        filter(tot.cases > 30)
+        filter(tot.cases > mincases)
 
     strings <- list(
         en = list(
@@ -9,7 +15,8 @@ plot_repronum <- function(estimates, country_name, language) {
             ci = "95% confidence interval",
             new_cases = "newly reported cases",
             title = "Estimated reproduction number / newly reported cases",
-            date = "date"
+            date = "date",
+            xaxis = "date of infection / reporting date"
         ),
         de = list(
             repno = "Reproduktionszahl",
@@ -17,7 +24,8 @@ plot_repronum <- function(estimates, country_name, language) {
             ci = "95% Konfidenzintervall",
             new_cases = "neu gemeldete Fälle",
             title = "Geschätzte Reproduktionszahl / neu gemeldete Fälle",
-            date = "Datum"
+            date = "Datum",
+            xaxis = "Infektionsdatum / Meldedatum"
         )
     )
 
@@ -70,14 +78,16 @@ plot_repronum <- function(estimates, country_name, language) {
                 title = translations$repno,
                 tickmode = "array",
                 tickvals = 1:10,
-                range = log(c(min(c(0.3, estimates$ci.lower), na.rm = TRUE), 10), base = 10)
+                range = log(c(min(c(0.3, estimates$ci.lower), na.rm = TRUE), 10), base = 10),
+                gridcolor = "#00000018"
                 ),
             colorway = c("black", "grey", "red", "blue"),
             yaxis2 = list(
                 overlaying = "y",
                 side = "right",
                 title = translations$new_cases,
-                fixedrange = TRUE
+                fixedrange = TRUE,
+                gridcolor = "#FFFFFF00"
                 ),
             xaxis =  list(
                 ticks = "outside",
@@ -86,7 +96,8 @@ plot_repronum <- function(estimates, country_name, language) {
                 showgrid = TRUE,
                 type = "date",
                 tickformat = "%d/%m",
-                title = translations$date
+                title = translations$xaxis,
+                gridcolor = "#00000040"
                 ),
             legend = list(
                 x = 0.2,

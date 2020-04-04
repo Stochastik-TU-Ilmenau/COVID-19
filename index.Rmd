@@ -22,9 +22,6 @@ of the
 ```{r libraries, echo = F, message = F, warning = F, results='hide'}
 library(lubridate, warn.conflicts = F)
 library(plotly, warn.conflicts = F)
-library(ggplot2, warn.conflicts = F)
-library(magrittr, warn.conflicts = F)
-library(dplyr, warn.conflicts = F)
 Sys.setlocale('LC_TIME', 'C')
 source("plot.r")
 source("estimator.r")
@@ -93,7 +90,7 @@ out <- lapply(seq_along(plots), function(i) {
 
 ##
 
-Above, we show results for the 20 most affected countries; results for all available countries may be found [here](all.html). In addition, we results for Germany and its Bundesländer are available [here](RKI.html) (in German).
+Above, we show results for the 20 most affected countries  (by total number of infections); results for all available countries may be found [here](all.html). In addition, results for Germany and its Bundesländer are available [here](RKI.html) (in German).
 
 ```{r echo=FALSE, results="asis"}
 cat(paste(

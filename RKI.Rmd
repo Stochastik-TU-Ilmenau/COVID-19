@@ -6,9 +6,6 @@ output: html_document
 ```{r libraries, echo = F, message = F, warning = F, results='hide'}
 library(lubridate, warn.conflicts = F)
 library(plotly, warn.conflicts = F)
-library(ggplot2, warn.conflicts = F)
-library(magrittr, warn.conflicts = F)
-library(dplyr, warn.conflicts = F)
 Sys.setlocale('LC_TIME', 'C')
 source("plot.r")
 source("estimator.r")
