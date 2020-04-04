@@ -83,5 +83,8 @@ out <- lapply(seq_along(plots), function(i) {
 Above, we show results for the all countries with at least `r mincases` cases; results for the world as well as the largest 20 countries may be found [here](index.html). In addition,  results for Germany and its Bundesländer are available [here](RKI.html) (in German).
 
 ```{r echo=FALSE, results="asis"}
-cat(paste(readLines("notes.md"), "\n"), sep = "\n")
+cat(paste(
+    gsub("!NOW!", format(Sys.time(), '%d/%m/%y %H:%M', tz = "GMT"),
+        readLines("notes.md")),
+"\n"), sep = "\n")
 ```
