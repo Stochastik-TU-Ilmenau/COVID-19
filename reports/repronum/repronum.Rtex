@@ -154,8 +154,14 @@
 % \newcommand{\dsi}{\pmb\cdot}
 
 \title{Monitoring the spread of COVID-19 by estimating reproduction numbers over time}
-\author{TU Ilmenau\\AG Stochastik}
-\date{\rinline{format(Sys.time(), '%d/%m/%y %H:%M', tz = "GMT")} GMT}
+\author{%
+    Thomas Hotz$^1$, Matthias Glock$^1$, Stefan Heyder$^1$, Sebastian Semper$^1$,\\ Alexander Krämer$^2$, Anne Böhle$^2$\\[24pt]
+    $^1$ Institut für Mathematik, Technische Universität Ilmenau\\
+    \texttt{\{thomas.hotz,matthias.glock,stefan.heyder,sebastian.semper\}@tu-ilmenau.de}\\[6pt]
+    $^2$ School of Public Health, Bielefeld University\\
+    \texttt{\{alexander.kraemer,anne.boehle\}@uni-bielefeld.de}
+}
+\date{\rinline{format(Sys.time(), '%d/%m/%y -- %H:%M', tz = "GMT")} GMT}
 
 \begin{document}
 
@@ -163,16 +169,44 @@
 % library(lubridate, warn.conflicts=FALSE)
 %% end.rcode
 
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
 
 \maketitle
+
+\begin{abstract}
+We
+\end{abstract}
 
 \tableofcontents
 
 \section{Introduction}
 
-
-
 \cite{fraser2007}
+
+\section{Derivation of the estimator}
+
+\section{Specifics of COVID-19}
+
+\section{Testing on simulated data}
+
+\section{Application to real data}
+
+\section{Sensitivity analysis}
+
+\section{Comparison with other estimators}
+
+\section{Discussion and Outlook}
+
+\paragraph{Acknowledgements.}
+
+The authors thank Dr. med. Luise Prüfer-Krämer, Steering Committee Member, German Society of Tropical Medicine and Global Health and practising physician, for many fruitful discussions and insights into the care of COVID-19 patients.
+
+\appendix
+
+\section{Derivation of confidence intervals}
+
+\section{Derivation of the infectivity profile for the SEIR-model}
 
 \bibliographystyle{dcu}
 \setlength{\bibsep}{3pt}
