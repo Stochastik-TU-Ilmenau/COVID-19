@@ -40,7 +40,7 @@ See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
 on generating tabs in rmarkdown automatically
 -->
 ```{r, echo = F, warning = F, message = F}
-mincases <- 2000
+mincases <- 200
 
 maxday <- max(johns_hopkins$day)
 df <- subset(johns_hopkins, day == maxday, select = c(reg0.name, tot.cases))
