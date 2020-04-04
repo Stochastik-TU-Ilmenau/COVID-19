@@ -1,7 +1,22 @@
 ---
-title: 'All countries with over 100 cases (alphabetical order)'
+title: 'Monitoring the spread of COVID-19 by estimating reproduction numbers over time'
 output: html_document
 ---
+
+Created by
+[Prof. Dr. Thomas Hotz](https://www.tu-ilmenau.de/stochastik/team/thomas-hotz/),
+[Stefan Heyder](https://www.tu-ilmenau.de/stochastik/team/stefan-heyder/),
+[Matthias Glock](https://www.tu-ilmenau.de/stochastik/team/matthias-glock/)
+and [Sebastian Semper](https://www.tu-ilmenau.de/stochastik/team/sebastian-semper/)
+of the
+*[AG Stochastik](https://www.tu-ilmenau.de/stochastik/), [Technische Universität Ilmenau](https://www.tu-ilmenau.de/)*
+<br/>
+in collaboration with
+[Prof. Dr. Alexander Krämer](https://ekvv.uni-bielefeld.de/pers_publ/publ/PersonDetail.jsp?personId=21463&lang=de)
+and
+[Anne Böhle](anne.boehle@uni-bielefeld.de)
+of the
+*[School of Public Health](https://www.uni-bielefeld.de/gesundhw/index.html), [Bielefeld University](https://www.uni-bielefeld.de/)*.
 
 ```{r libraries, echo = F, message = F, warning = F, results='hide'}
 library(lubridate, warn.conflicts = F)
@@ -18,24 +33,19 @@ source("estimator.r")
 johns_hopkins <- read.csv("data/clean/data_world_jh.csv")
 ```
 
-```{r plots, echo = F, cache = F, message = F}
-
-```
-
 ## {.tabset .tabset-fade}
-
-[back](index.html)
 
 <!--
 See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
 on generating tabs in rmarkdown automatically
 -->
 ```{r, echo = F, warning = F, message = F}
+mincases <- 2000
 
 maxday <- max(johns_hopkins$day)
 df <- subset(johns_hopkins, day == maxday, select = c(reg0.name, tot.cases))
 df <- df[order(df$reg0.name),]
-countries <- df$reg0.name[df$tot.cases > 100]
+countries <- df$reg0.name[df$tot.cases > mincases]
 names(countries) <- countries
 
 plots <- lapply(countries, function(country_name) {
@@ -51,7 +61,7 @@ plots <- lapply(countries, function(country_name) {
             conf.level = 1 - alpha,
             pad.zeros = TRUE
         ))
-    
+
     plot_repronum(estimates, country_name, language = "en")
 })
 
@@ -67,3 +77,11 @@ out <- lapply(seq_along(plots), function(i) {
 ```
 
 `r paste(knitr::knit(text = paste(out, collapse = '\n')))`
+
+##
+
+Above, we show results for the all countries with at least `r mincases` cases; results for the world as well as the largest 20 countries may be found [here](index.html). In addition,  results for Germany and its Bundesländer are available [here](RKI.html) (in German).
+
+```{r echo=FALSE, results="asis"}
+cat(paste(readLines("notes.md"), "\n"), sep = "\n")
+```
