@@ -7,11 +7,11 @@
 - Estimates are shown in black, confidence intervals as grey stripes, with values specified by the left axis (on a log-scale).
 - The **critical value** for the reproduction number is 1, shown as a red horizontal line: a value larger than one would result in an exponential increase of infections, a value smaller than one in a decrease.
 - The analysis is based on **newly reported cases** of Coronavirus Disease 2019 (COVID-19) per day, shown as blue bars as specified by the right axis (on a linear scale). For these we rely on the data provided by [Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19).
-- For the estimatated reproduction number (lines, left vertical axis), the horizontal axis specifies the coresponding date of infection whereas for the newly reported cases (bars, right axis), it specifies the date the cases were reported.
+- For the estimated reproduction number (lines, left vertical axis), the horizontal axis specifies the corresponding date of infection whereas for the newly reported cases (bars, right axis), it specifies the date the cases were reported.
 - The graphics are updated daily (last update: !NOW! GMT), showing data up to yesterday.
 - Note that cases are reported much later than the corresponding day of infection, namely after incubation time plus some more days necessary for testing and reporting the case to the authorities. For simplicity we assume that cases are reported 7 days after infection. Therefore, estimates for the reproduction number lag one week behind the reporting of new cases.
 - In a population where no countermeasures have been put into place, the reproduction number is believed to be given by some value between 2.4 and 3.3. Estimates higher than that might be explained by a considerable number of imported cases before the day being considered.
--  Details may be found in the accompanying [Technical Report](); the code is avalaible [here](https://github.com/Stochastik-TU-Ilmenau/COVID-19/blob/gh-pages/estimator.r).
+-  Details may be found in the accompanying [Technical Report](); the code is available [here](https://github.com/Stochastik-TU-Ilmenau/COVID-19/blob/gh-pages/estimator.r).
 
 ### References
 
