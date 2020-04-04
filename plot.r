@@ -1,3 +1,7 @@
+library(plotly)
+library(magrittr)
+library(lubridate)
+
 mincases <- 30
 
 plot_repronum <- function(estimates, country_name, language) {
