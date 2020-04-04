@@ -30,7 +30,7 @@ source("estimator.r")
 
 ```{r data, echo = F}
 johns_hopkins <- read.csv("data/clean/data_world_jh.csv")
-#germany <- read.csv("data/clean/data_ger_bundl.csv")
+world_tot <- read.csv("data/clean/data_world_tot.csv")
 ```
 
 ## {.tabset .tabset-fade}
@@ -40,14 +40,16 @@ See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
 on generating tabs in rmarkdown automatically
 -->
 ```{r, echo = F, warning = F, message = F}
+numcountries <- 20
+
+# add world tot. cases to johns-hopkins data
+world_tot$reg0.name <- "World"
+johns_hopkins <- merge(johns_hopkins, world_tot, all=TRUE)
 
 maxday <- max(johns_hopkins$day)
 df <- subset(johns_hopkins, day == maxday, select = c(reg0.name, tot.cases))
 df <- df[rev(order(df$tot.cases)),]
-countries <- df$reg0.name[1:21]
-
-#countries <- c("Germany", "Italy", "Spain", "France", "Switzerland", "Netherlands", "Austria", "United Kingdom", "Korea, South", "US")
-names(countries) <- countries
+countries <- unique(df$reg0.name[1:(numcountries + 1)])
 
 plots <- lapply(countries, function(country_name) {
     country <- johns_hopkins %>%
@@ -90,7 +92,7 @@ out <- lapply(seq_along(plots), function(i) {
 
 ##
 
-Above, we show results for the 20 most affected countries  (by total number of infections); results for all available countries may be found [here](all.html). In addition, results for Germany and its Bundesländer are available [here](RKI.html) (in German).
+Above, we show results for the `r numcountries` most affected countries  (by total number of infections); results for all available countries may be found [here](all.html). In addition, results for Germany and its Bundesländer are available [here](RKI.html) (in German).
 
 ```{r echo=FALSE, results="asis"}
 cat(paste(

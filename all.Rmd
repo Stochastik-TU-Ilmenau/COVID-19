@@ -42,8 +42,7 @@ on generating tabs in rmarkdown automatically
 # needs to be "> report.delay" (see estimator.r)
 df_num_days <- subset(johns_hopkins, tot.cases > mincases, select = c(reg0.name, tot.cases))
 num_days <- aggregate(tot.cases ~ reg0.name, df_num_days, length)
-countries <- num_days$reg0.name[num_days$tot.cases > report.delay]
-names(countries) <- countries
+countries <- unique(num_days$reg0.name[num_days$tot.cases > report.delay])
 
 plots <- lapply(countries, function(country_name) {
     country <- johns_hopkins %>%
