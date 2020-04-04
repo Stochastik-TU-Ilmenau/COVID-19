@@ -1,0 +1,182 @@
+\documentclass[a4paper,fleqn,10pt]{article}
+\usepackage{a4wide}
+\setlength{\headheight}{0mm}
+\setlength{\headsep}{0mm}
+\addtolength{\topmargin}{-5mm}
+\addtolength{\textheight}{30mm}
+\pdfcompresslevel9
+% \usepackage[pdftex]{color}
+% \usepackage{color}
+\definecolor{urlcolor}{rgb}{0,0.5,0}
+\definecolor{linkcolor}{rgb}{0.5,0,0}
+\definecolor{citecolor}{rgb}{0,0,0.5}
+\usepackage[pdfpagemode=UseOutlines,urlcolor=urlcolor,linkcolor=linkcolor,citecolor=citecolor,colorlinks=true]{hyperref}
+
+\usepackage[british]{babel}
+\usepackage{natbib}
+
+%% to be compiled using knitr: library(knitr); knit(file)
+%% for inline R code: if the inline code is not correctly parsed, you will see a message
+\newcommand{\rinline}[1]{???}
+%% begin.rcode setup, include=TRUE, echo=FALSE
+% if("knitr" %in% .packages()) {
+% opts_chunk$set(fig.path='figure/latex-', cache.path='cache/latex-')
+% #opts_chunk$set(cache = TRUE, autodep = TRUE) # cache everything by default
+% #opts_knit$set(latex.options.color = list("pdftex")) # use latex color package with option for pdftex
+% opts_chunk$set(indent = "  ") # indent by 2 whitespaces
+% opts_chunk$set(echo = FALSE, results = "hide") # hide everything but plots by default
+% #opts_chunk$set(echo = TRUE, results = "markup") # show everything incl. plots by default
+% }
+%% end.rcode
+
+\usepackage{amsmath,amsfonts,amssymb}
+% \usepackage{bbold}
+\usepackage{dsfont}
+\usepackage{mathrsfs}
+% \numberwithin{equation}{section}
+\usepackage{textcomp}
+\usepackage[amsmath,thref,thmmarks,hyperref]{ntheorem}
+\theoremseparator{:}
+\theoremsymbol{\raisebox{2pt}{\scriptsize\ensuremath{\Diamond}}}
+\newtheorem{Prop}{Proposition}%[section]
+\newtheorem{Thm}[Prop]{Theorem}
+\newtheorem{Lem}[Prop]{Lemma}
+\newtheorem{Cor}[Prop]{Corollary}
+\theorembodyfont{\upshape}
+\newtheorem{Rem}[Prop]{Remark}
+\newtheorem{Def}[Prop]{Definition}
+\newtheorem{Ex}[Prop]{Example}
+\theoremstyle{nonumberplain}
+\theoremheaderfont{\scshape}
+\theorembodyfont{\upshape}
+\theoremsymbol{\raisebox{1pt}{\scriptsize\ensuremath{\Box}}}
+\newtheorem{Proof}{Proof}
+\newtheorem{Noproof}{Without proof}
+
+% \newcommand{\gqq}[1]{\glqq{}#1\grqq{}}
+% \newcommand{\eqn}[1]{\begin{equation}#1\end{equation}}
+% \newcommand{\eqns}[1]{\begin{equation*}#1\end{equation*}}
+% \newcommand{\mat}[1]{\begin{pmatrix}#1\end{pmatrix}}
+% \newcommand{\smat}[1]{\bigl(\begin{smallmatrix}#1\end{smallmatrix}\bigr)}
+% \newcommand{\iii}[1]{\begin{enumerate}[(i)]#1\end{enumerate}}
+% \newcommand{\term}[1]{\textbf{#1}}
+% \newcommand{\lang}[2]{\textup{#1} \textsl{#2}}
+% \newcommand{\engl}[1]{\textup{engl.} \textsl{#1}}
+% \newcommand{\lat}[1]{\textsl{#1}}
+
+\renewcommand{\P}{\mathbf{P}}
+\DeclareMathOperator{\E}{\mathbf{E}}
+\DeclareMathOperator{\Var}{\mathbf{Var}}
+\DeclareMathOperator{\Cov}{\mathbf{Cov}}
+% \DeclareMathOperator{\Cor}{\mathbf{Cor}}
+% \DeclareMathOperator{\Med}{\mathbf{Med}}
+% \DeclareMathOperator{\MSE}{\mathbf{MSE}}
+% \DeclareMathOperator{\MSEP}{\mathbf{MSEP}}
+% \DeclareMathOperator{\Bias}{\mathbf{Bias}}
+% \DeclareMathOperator{\se}{\mathbf{s.e.}}
+% \DeclareMathOperator{\linspan}{\mathbf{span}}
+\DeclareMathOperator{\tr}{\mathbf{tr}}
+% \DeclareMathOperator{\Dim}{\mathbf{dim}}
+% \DeclareMathOperator{\re}{\mathbf{Re}}
+% \DeclareMathOperator{\im}{\mathbf{Im}}
+% \renewcommand{\Re}{\re}
+% \renewcommand{\Im}{\im}
+% \DeclareMathOperator{\Arg}{\mathbf{Arg}}
+% \DeclareMathOperator*{\argmin}{argmin}
+% \DeclareMathOperator*{\argmax}{argmax}
+% \DeclareMathOperator{\rk}{\mathbf{rk}}
+\DeclareMathOperator{\supp}{\mathbf{supp}}
+% \DeclareMathOperator{\esup}{\mathbf{ess\,sup}}
+% \DeclareMathOperator{\sgn}{\mathrm{sgn}}
+\newcommand{\N}{\mathbf{N}}
+% \newcommand{\Z}{\mathbf{Z}}
+% \newcommand{\Q}{\mathbf{Q}}
+\newcommand{\R}{\mathbf{R}}
+% \newcommand{\C}{\mathbf{C}}
+\newcommand{\I}{\mathbf{I}}
+% \newcommand{\Id}{\mathbf{Id}}
+\newcommand{\ind}{\mathds{1}}
+% \newcommand{\Pot}{\mathcal{P}}
+% \newcommand{\trans}{'}
+% \newcommand{\1}{\mathbf{1}}
+% \newcommand{\e}{\imath}
+\newcommand{\T}{^{\!\top}}%mathrm{t}}
+% \renewcommand{\c}{^{\scriptscriptstyle\complement}}
+% \newcommand{\orth}{^\bot}
+% \DeclareMathOperator{\vc}{\mathbf{vec}}
+% \renewcommand{\vec}{\vc}
+% \DeclareMathOperator{\col}{\mathcal{L}}
+% \DeclareMathOperator{\ke}{\mathbf{ke}}
+% \DeclareMathOperator{\rk}{\mathbf{rk}}
+\newcommand{\eps}{\varepsilon}
+% \newcommand{\Eps}{\mathcal{E}}
+% \newcommand{\Beta}{\mathcal{B}}
+\newcommand{\ph}{\varphi}
+\newcommand{\Sigm}{\varSigma}
+\newcommand{\st}{\,:\,}
+\newcommand{\cond}{\,\vert\,}
+\newcommand{\de}{\mathrm{d}}
+\newcommand{\dd}{\,\mathrm{d}}
+% \newcommand{\fuconv}{\stackrel{\text{f.\"u.}}{\rightarrow}}
+\newcommand{\Lpconv}[1][p]{\stackrel{\L^{#1}}{\rightarrow}}
+% \newcommand{\muconv}[1][\mu]{\stackrel{#1}{\rightarrow}}
+% \newcommand{\wconv}{\Rightarrow}
+% \newcommand{\dconv}{\stackrel{\mathcal{D}}{\rightarrow}}
+% \newcommand{\pconv}{\stackrel{\P}{\rightarrow}}
+% \newcommand{\qconv}{\stackrel{\L^2}{\rightarrow}}
+\newcommand{\iid}{\stackrel{\text{\textup{iid}}}{\sim}}
+% \newcommand{\norm}{\mathcal{N}}
+% \newcommand{\Binom}{\mathrm{Binom}}
+% \newcommand{\Unif}{\mathrm{Unif}}
+% \newcommand{\Pois}{\mathrm{Pois}}
+% \newcommand{\Exp}{\mathrm{Exp}}
+\newcommand{\A}{\mathcal{A}}
+% \newcommand{\B}{\mathcal{B}}
+\newcommand{\F}{\mathcal{F}}
+% \newcommand{\G}{\mathcal{G}}
+% \newcommand{\Term}{\mathcal{T}}
+% \newcommand{\HH}{\mathcal{H}}
+\renewcommand{\L}{\mathrm{L}}
+% \newcommand{\Ell}{\mathscr{L}}
+% \newcommand{\cont}{\mathit{C}}
+% \newcommand{\contb}{\mathit{C}_b}
+% \newcommand{\contc}{\mathit{C}_C}
+% \newcommand{\AC}{\text{\upshape AC}}
+% \newcommand{\BV}{\text{\upshape BV}}
+% \newcommand{\ord}{\mathrm{o}}
+% \newcommand{\Ord}{\mathrm{O}}
+% \renewcommand{\O}{\mathcal{O}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+% \newcommand{\leb}{\boldsymbol\lambda}
+% % from http://tex.stackexchange.com/questions/54385/spacing-between-triple-vertical-lines
+% \newcommand{\VERT}[1]{{\left\vert\kern-0.25ex\left\vert\kern-0.25ex\left\vert #1 \right\vert\kern-0.25ex\right\vert\kern-0.25ex\right\vert}}
+% \newcommand{\dsi}{\pmb\cdot}
+
+\title{Monitoring the spread of COVID-19 by estimating reproduction numbers over time}
+\author{TU Ilmenau\\AG Stochastik}
+\date{\rinline{format(Sys.time(), '%d/%m/%y %H:%M', tz = "GMT")} GMT}
+
+\begin{document}
+
+%% begin.rcode libraries, include=TRUE, echo=FALSE, cache=FALSE
+% library(lubridate, warn.conflicts=FALSE)
+%% end.rcode
+
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+
+
+\cite{fraser2007}
+
+\bibliographystyle{dcu}
+\setlength{\bibsep}{3pt}
+\bibliography{../corona.bib}
+
+
+\end{document}
