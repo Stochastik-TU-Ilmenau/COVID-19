@@ -13,6 +13,7 @@ source("estimator.r")
 
 ```{r data, echo = F}
 germany <- read.csv("data/clean/data_ger_bundl.csv")
+ger_tot <- read.csv("data/clean/data_ger_tot.csv")
 ```
 
 ```{r plots, echo = F, cache = F, message = F}
@@ -29,18 +30,13 @@ on generating tabs in rmarkdown automatically
 -->
 ```{r, echo = F, warning = F, message = F}
 
-# add all of Germany to data
-ger <- aggregate(cbind(tot.cases, tot.dead, new.cases, new.dead)
-                 ~ day + yday + date, germany, sum)
-ger$reg0.name <- "Deutschland"
-germany <- merge(ger, germany, all=TRUE)
+# add all of Germany to Bundesland data
+ger_tot$reg0.name <- "Deutschland"
+germany <- merge(ger_tot, germany, all=TRUE)
 
-# tabs for Bundeslaender (and all Germany) sorted by tot.cases
-maxday <- max(germany$day)
-regions <- subset(germany, day == maxday, select = c(reg0.name, tot.cases))
-regions <- regions[rev(order(regions$tot.cases)),]
-regions <- regions$reg0.name
-names(regions) <- regions
+# tabs for Bundeslaender (and all Germany) sorted alphabetically
+regions <- sort(unique(germany$reg0.name))
+regions <- c("Deutschland", regions[!(regions == "Deutschland")])
 
 plots <- lapply(regions, function(country_name) {
     country <- germany %>%
