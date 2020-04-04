@@ -1,6 +1,8 @@
+mincases <- 30
+
 plot_repronum <- function(estimates, country_name, language) {
     estimates <- estimates %>%
-        filter(tot.cases > 30)
+        filter(tot.cases > mincases)
 
     strings <- list(
         en = list(

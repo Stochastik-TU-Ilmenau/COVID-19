@@ -16,3 +16,4 @@
 ### References
 
 <a name="ref1">[1]</a>: Fraser, C. (2007). *Estimating Individual and Household Reproduction Numbers in an Emerging Epidemic.* PLOS ONE 2 (8), [https://doi.org/10.1371/journal.pone.0000758](https://doi.org/10.1371/journal.pone.0000758).
+

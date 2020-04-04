@@ -40,12 +40,12 @@ See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
 on generating tabs in rmarkdown automatically
 -->
 ```{r, echo = F, warning = F, message = F}
-mincases <- 200
-
-maxday <- max(johns_hopkins$day)
-df <- subset(johns_hopkins, day == maxday, select = c(reg0.name, tot.cases))
-df <- df[order(df$reg0.name),]
-countries <- df$reg0.name[df$tot.cases > mincases]
+# Filter countries with too few cases.
+# Days from "mincases" (see plot.r) to yesterday
+# needs to be "> report.delay" (see estimator.r)
+df_num_days <- subset(johns_hopkins, tot.cases > mincases, select = c(reg0.name, tot.cases))
+num_days <- aggregate(tot.cases ~ reg0.name, df_num_days, length)
+countries <- num_days$reg0.name[num_days$tot.cases > report.delay]
 names(countries) <- countries
 
 plots <- lapply(countries, function(country_name) {
@@ -80,7 +80,7 @@ out <- lapply(seq_along(plots), function(i) {
 
 ##
 
-Above, we show results for the all countries with at least `r mincases` cases; results for the world as well as the largest 20 countries may be found [here](index.html). In addition,  results for Germany and its Bundesländer are available [here](RKI.html) (in German).
+Above, we show results for the all countries with at least `r mincases` cases `r report.delay` days ago; results for the world as well as the largest 20 countries may be found [here](index.html). In addition,  results for Germany and its Bundesländer are available [here](RKI.html) (in German).
 
 ```{r echo=FALSE, results="asis"}
 cat(paste(
