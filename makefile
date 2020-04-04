@@ -1,6 +1,6 @@
 all: index.html RKI.html all.html
 
-.PHONY: index.html RKI.html all.html
+.PHONY: all index.html RKI.html all.html
 
 index.html: index.Rmd
 	Rscript -e "rmarkdown::render('index.Rmd')"

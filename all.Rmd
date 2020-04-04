@@ -76,7 +76,7 @@ out <- lapply(seq_along(plots), function(i) {
 
 ##
 
-Above, we show results for the all countries with at least `r mincases` cases `r report.delay` days ago; results for the world as well as the largest 20 countries may be found [here](index.html). In addition,  results for Germany and its Bundesländer are available [here](RKI.html) (in German).
+Above, we show results for all countries with at least `r mincases` cases `r report.delay` days ago; results for the world as well as the 20 most affected countries may be found [here](index.html). In addition, results for Germany and its Bundesländer are available [here](RKI.html) (in German).
 
 ```{r echo=FALSE, results="asis"}
 cat(paste(
