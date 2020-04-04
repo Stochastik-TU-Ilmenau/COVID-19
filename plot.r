@@ -5,6 +5,7 @@ plot_repronum <- function(estimates, country_name, language) {
     strings <- list(
         en = list(
             repno = "reproduction number",
+            est_repno = "estimated reproduction number",
             ci = "95% confidence interval",
             new_cases = "newly reported cases",
             title = "Estimated reproduction number / newly reported cases",
@@ -12,6 +13,7 @@ plot_repronum <- function(estimates, country_name, language) {
         ),
         de = list(
             repno = "Reproduktionszahl",
+            est_repno = "geschätzte Reproduktionszahl",
             ci = "95% Konfidenzintervall",
             new_cases = "neu gemeldete Fälle",
             title = "Geschätzte Reproduktionszahl / neu gemeldete Fälle",
@@ -24,10 +26,43 @@ plot_repronum <- function(estimates, country_name, language) {
 
     first_monday <- ymd("2020-01-06")
     plot_ly(estimates, x= ~date, y= ~repronum) %>%
-        add_lines(name = translations$repno) %>%
-        add_ribbons(ymin = ~ci.lower, ymax = ~ci.upper, opacity = .5, name = translations$ci) %>%
-        add_lines(y = ~1, name = "R = 1", opacity = .3, line = list(dash = "dash")) %>%
-        add_bars(y = ~new.cases, yaxis = "y2", opacity = .1, name = translations$new_cases) %>%
+        add_lines(
+            name = translations$repno,
+            hovertemplate = paste0(
+                "<b>", translations$date, "</b>: %{x|%d/%m/%Y}",
+                "<br><b>", translations$est_repno, "</b>: %{y:.2f}",
+                "<br><b>", translations$ci, "</b>: %{text}",
+                "<extra></extra>" # remove extra information
+            ),
+            text = ~sprintf("[%.2f, %.2f]", ci.lower, ci.upper),
+            hoverinfo = "text"
+        ) %>%
+        add_ribbons(
+            ymin = ~ci.lower,
+            ymax = ~ci.upper,
+            opacity = .5,
+            hoverinfo = "none",
+            name = translations$ci
+        ) %>%
+        add_lines(
+            y = ~1,
+            name = "R = 1",
+            opacity = .3,
+            hoverinfo = "none",
+            line = list(dash = "dash")
+        ) %>%
+        add_bars(
+            y = ~new.cases,
+            yaxis = "y2",
+            opacity = .1,
+            hovertemplate = paste0(
+                "<b>", translations$date ,"</b>: %{x}",
+                "<br><b>", translations$new_cases, "</b>: %{y:.0f}",
+                "<extra></extra>" # remove extra information
+            ),
+            hoverinfo = "text",
+            name = translations$new_cases
+        ) %>%
         layout(
             title = translations$title,
             yaxis = list(
@@ -55,10 +90,12 @@ plot_repronum <- function(estimates, country_name, language) {
                 ),
             legend = list(
                 x = 0.2,
-                y = -0.15,
+                y = -0.23,
                 font = list(size = 10),
                 bgcolor = "#FFFFFF00",
-                orientation = "h"
+                orientation = "h",
+                itemclick = FALSE,
+                itemdoubleclick = FALSE
                 ),
             margin = list(r = 60, t = 100),
             shapes = lapply(seq(min(estimates$date), today(), by = "1 day"), function (day) {
