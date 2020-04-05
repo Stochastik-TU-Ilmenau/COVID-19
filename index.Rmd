@@ -92,7 +92,7 @@ out <- lapply(seq_along(plots), function(i) {
 
 ##
 
-Above, we show results for all countries as well as the `r numcountries` most affected countries  (by total number of infections); results for all available countries may be found [here](all.html). In addition, results for Germany and its Bundesländer are available [here](RKI.html) (in German).
+Above, we show results for all countries as well as the `r numcountries` most affected countries  (by total number of infections); results for all available countries may be found [here](all.html). In addition, results for Germany and its Bundesländer are available [here](germany.html) (in German).
 
 ```{r echo=FALSE, results="asis"}
 cat(paste(
