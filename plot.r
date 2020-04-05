@@ -145,8 +145,9 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             yaxis = list(
                 type = "log",
                 title = translations$repno,
-                tickmode = "array",
-                tickvals = 1:10,
+                #tickmode = "array",
+                tickvals = c(0.1 * (1:9), 1:10),
+                ticktext = c(rep(" ", 4), "0.5", rep(" ", 4), 1:5, " ", 7, " ", " ", 10),
                 range = log(c(min(c(0.3, estimates$ci.lower), na.rm = TRUE), 10), base = 10),
                 gridcolor = "#00000018"
                 ),
