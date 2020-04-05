@@ -9,7 +9,10 @@ johns_hopkins:
 d=`date +%Y-%m-%d`
 get_rki:
 	mkdir -p rki_data
-	cd rki_data; wget -O RKI_COVID19_$d.csv https://opendata.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0.csv
+	# csv seems unreliable use arcgis query api instead
+	#cd rki_data; wget -O RKI_COVID19_$d.csv https://opendata.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0.csv
+	python rki_query.py
+	cd rki_data; mv RKI_COVID19.csv RKI_COVID19_$d.csv
 
 clean_data:
 	mkdir -p clean
