@@ -17,7 +17,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             title = "Estimated reproduction number / newly reported cases",
             date = "date",
             xaxis = "date of infection / reporting date",
-            unreliable = "this data is unreliable, as it may be updated in the future"
+            unreliable = "this data may be updated in the future."
         ),
         de = list(
             repno = "Reproduktionszahl",
@@ -27,7 +27,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             title = "Geschätzte Reproduktionszahl / neu gemeldete Fälle",
             date = "Datum",
             xaxis = "Infektionsdatum / Meldedatum",
-            unreliable = "Dieser Datenpunkt ist unzuverlässig"
+            unreliable = "Dieser Datenpunkt ist noch nicht final."
         )
     )
 
@@ -108,7 +108,8 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                     text = ~sprintf("[%.2f, %.2f]", ci.lower, ci.upper),
                     hoverinfo = "text",
                     showlegend = FALSE,
-                    opacity = 0.3
+                    opacity = 0.3,
+                    line = list(dash = "dot")
                     ) %>%
                 add_ribbons(
                     data = unreliable_estimates,
