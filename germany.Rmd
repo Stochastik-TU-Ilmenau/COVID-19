@@ -65,12 +65,12 @@ plots <- lapply(regions, function(country_name) {
             pad.zeros = TRUE
         ))
 
-    plot_repronum(estimates, country_name, language = "de")
+    plot_repronum(estimates, country_name, language = "de", unreliable = 3)
 })
 
 out <- lapply(seq_along(plots), function(i) {
   a1 <- knitr::knit_expand(text = sprintf("### %s\n", regions[i])) # tab header, auto extracts names of `hcs`
-  a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10}") # start r chunk
+  a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE, message = FALSE}") # start r chunk
   a3 <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i)) # extract graphs by "writing" out `hcs[[1]]`, `hcs[[2]]` etc. to be rendered later
   a4 <- knitr::knit_expand(text = "\n```\n") # end r chunk
 
