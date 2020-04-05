@@ -1,35 +1,8 @@
-
-import os
 import json
 import csv
-import io
-import sys
-import pytz
 import urllib.parse
-from datetime import datetime, timedelta
-from itertools import zip_longest
-
-import pandas as pd
+from datetime import datetime
 import requests
-
-STATE_NAME_ISONAME_MAP = {
-    "Baden-Württemberg": "DE-BW",
-    "Bayern": "DE-BY",
-    "Brandenburg": "DE-BB",
-    "Berlin": "DE-BE",
-    "Bremen": "DE-HB",
-    "Hamburg": "DE-HH",
-    "Hessen": "DE-HE",
-    "Mecklenburg-Vorpommern": "DE-MV",
-    "Niedersachsen": "DE-NI",
-    "Nordrhein-Westfalen": "DE-NW",
-    "Rheinland-Pfalz": "DE-RP",
-    "Saarland": "DE-SL",
-    "Sachsen-Anhalt": "DE-ST",
-    "Sachsen": "DE-SN",
-    "Schleswig-Holstein": "DE-SH",
-    "Thüringen": "DE-TH",
-}
 
 
 def arcgis_query(offset = 0, chunk_size = 1):
