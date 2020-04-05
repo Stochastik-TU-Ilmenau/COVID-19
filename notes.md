@@ -1,7 +1,7 @@
 ### Notes
 
 - We estimate the (effective) **reproduction number** *R(t)* at day *t*, i.e. the average number of people someone infected at time *t* would infect if conditions remained the same.
-- The **estimator** has been taken from [(Fraser 2007)](#ref1). It compares the number of infections at a time point with the number of infectious cases at that time, weighted by their respective infectivity. Note that constant (per country) **underreporting** does not affect the estimatates since both the number of infections and the number of infectious persons are reduced by the same proportionality factor.
+- The **estimator** has been taken from [(Fraser 2007)](#ref1). It compares the number of infections at a time point with the number of infectious cases at that time, weighted by their respective infectivity. Note that constant (per country) **underreporting** does not affect the estimates since both the number of infections and the number of infectious persons are reduced by the same proportionality factor.
 - For this estimator, we derived (approximate, pointwise) **95% confidence intervals** using the delta method.
 - However, the size of the confidence intervals reflects only those statistical uncertainties due to the random dynamics of the epidemic. But since the estimator is based on assumptions about the infectivity of the virus, and given that the data are not perfect because of a change of reporting criteria, varying amounts of testing etc., **the estimates should be interpreted cautiously** and not be taken at face value. Still, we believe that one can draw qualitatively credible conclusions from them.
 - Estimates are shown in black, confidence intervals as grey stripes, with values specified by the left axis (on a log-scale).
