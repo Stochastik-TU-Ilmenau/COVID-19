@@ -17,7 +17,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             title = "Estimated reproduction number / newly reported cases",
             date = "date",
             xaxis = "corresponding date of infection / reporting date of new cases",
-            unreliable = "this data may be updated in the future."
+            unreliable = "This data may be updated in the future."
         ),
         de = list(
             repno = "Reproduktionszahl",
