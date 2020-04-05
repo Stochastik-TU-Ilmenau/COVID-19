@@ -16,5 +16,7 @@
 ### References
 
 <a name="ref1">[1]</a>: Fraser, C. (2007). *Estimating Individual and Household Reproduction Numbers in an Emerging Epidemic.* PLOS ONE 2 (8), [https://doi.org/10.1371/journal.pone.0000758](https://doi.org/10.1371/journal.pone.0000758).
+
 <a name="ref2">[2]</a> WHO (2020). Report of the WHO-China Joint Mission on Coronavirus Disease 2019 (COVID-19), [https://www.who.int/publications-detail/report-of-the-who-china-joint-mission-on-coronavirus-disease-2019-(covid-19)](https://www.who.int/publications-detail/report-of-the-who-china-joint-mission-on-coronavirus-disease-2019-(covid-19)).
-<a name="ref3">[3]</a>: Read, J.M., Bridgen, J.R.E., Cummings, D.A.T., Ho, A., Jewell, C.P. (2020) *Novel coronavirus 2019-nCoV: early estimation of epidemiological parameters and epidemic predictions.* MedRxiv, Version 2, 01/28/2020, [https://doi.org/10.1101/2020.01.23.20018549](https://doi.org/10.1101/2020.01.23.20018549).
+
+<a name="ref3">[3]</a>: Read, J.M., Bridgen, J.R.E., Cummings, D.A.T., Ho, A., Jewell, C.P. (2020). *Novel coronavirus 2019-nCoV: early estimation of epidemiological parameters and epidemic predictions.* MedRxiv, Version 2, 01/28/2020, [https://doi.org/10.1101/2020.01.23.20018549](https://doi.org/10.1101/2020.01.23.20018549).
