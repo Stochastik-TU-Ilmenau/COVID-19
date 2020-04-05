@@ -9,14 +9,14 @@ Created by
 [Matthias Glock](https://www.tu-ilmenau.de/stochastik/team/matthias-glock/)
 and [Sebastian Semper](https://www.tu-ilmenau.de/stochastik/team/sebastian-semper/)
 of the
-*[AG Stochastik](https://www.tu-ilmenau.de/stochastik/), [Technische Universität Ilmenau](https://www.tu-ilmenau.de/)*
+[AG Stochastik](https://www.tu-ilmenau.de/stochastik/), [Technische Universität Ilmenau](https://www.tu-ilmenau.de/)
 <br/>
 in collaboration with
 [Prof. Dr. Alexander Krämer](https://ekvv.uni-bielefeld.de/pers_publ/publ/PersonDetail.jsp?personId=21463&lang=de)
 and
 [Anne Böhle](anne.boehle@uni-bielefeld.de)
 of the
-*[School of Public Health](https://www.uni-bielefeld.de/gesundhw/index.html), [Bielefeld University](https://www.uni-bielefeld.de/)*.
+[School of Public Health](https://www.uni-bielefeld.de/gesundhw/index.html), [Bielefeld University](https://www.uni-bielefeld.de/).
 
 
 ```{r libraries, echo = F, message = F, warning = F, results='hide'}
