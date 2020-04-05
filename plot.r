@@ -16,7 +16,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             new_cases = "newly reported cases",
             title = "Estimated reproduction number / newly reported cases",
             date = "date",
-            xaxis = "date of infection / reporting date",
+            xaxis = "corresponding date of infection / reporting date of new cases",
             unreliable = "this data may be updated in the future."
         ),
         de = list(
@@ -26,7 +26,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             new_cases = "neu gemeldete Fälle",
             title = "Geschätzte Reproduktionszahl / neu gemeldete Fälle",
             date = "Datum",
-            xaxis = "Infektionsdatum / Meldedatum",
+            xaxis = "zugehöriges Infektionsdatum / Meldedatum neuer Fälle",
             unreliable = "Dieser Datenpunkt ist noch nicht endgültig."
         )
     )
@@ -58,7 +58,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
         add_lines(
             name = translations$repno,
             hovertemplate = paste0(
-                "<b>", translations$date, "</b>: %{x|%d/%m/%Y}",
+                "<b>", translations$date, "</b>: %{x|", if(language == "en") "%d/%m/%Y" else "%d.%m.%Y", "}",
                 "<br><b>", translations$est_repno, "</b>: %{y:.2f}",
                 "<br><b>", translations$ci, "</b>: %{text}",
                 "<extra></extra>" # remove extra information
@@ -85,7 +85,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             yaxis = "y2",
             opacity = .1,
             hovertemplate = paste0(
-                "<b>", translations$date ,"</b>: %{x}",
+                "<b>", translations$date, "</b>: %{x|", if(language == "en") "%d/%m/%Y" else "%d.%m.%Y", "}",
                 "<br><b>", translations$new_cases, "</b>: %{y:.0f}",
                 "<extra></extra>" # remove extra information
             ),
@@ -99,7 +99,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                     x = ~date,
                     y = ~repronum,
                     hovertemplate = paste0(
-                        "<b>", translations$date, "</b>: %{x|%d/%m/%Y}",
+                        "<b>", translations$date, "</b>: %{x|", if(language == "en") "%d/%m/%Y" else "%d.%m.%Y", "}",
                         "<br><b>", translations$est_repno, "</b>: %{y:.2f}",
                         "<br><b>", translations$ci, "</b>: %{text}",
                         "<br><i>", translations$unreliable, "</i>",
@@ -126,7 +126,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                     yaxis = "y2",
                     opacity = .05,
                     hovertemplate = paste0(
-                        "<b>", translations$date, "</b>: %{x}",
+                        "<b>", translations$date, "</b>: %{x|", if(language == "en") "%d/%m/%Y" else "%d.%m.%Y", "}",
                         "<br><b>", translations$new_cases, "</b>: %{y:.0f}",
                         "<br><i>", translations$unreliable, "</i>",
                         "<extra></extra>" # remove extra information
@@ -147,7 +147,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                 title = translations$repno,
                 #tickmode = "array",
                 tickvals = c(0.1 * (1:9), 1:10),
-                ticktext = c(rep(" ", 4), "0.5", rep(" ", 4), 1:5, " ", 7, " ", " ", 10),
+                ticktext = c(0.1 * (1:3), " ", 0.5, " ", 0.7, " ", " ", 1:3, " ", 5, " ", 7, " ", " ", 10),
                 range = log(c(min(c(0.3, estimates$ci.lower), na.rm = TRUE), 10), base = 10),
                 gridcolor = "#00000018"
                 ),
