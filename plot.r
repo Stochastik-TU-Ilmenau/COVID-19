@@ -27,7 +27,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             title = "Geschätzte Reproduktionszahl / neu gemeldete Fälle",
             date = "Datum",
             xaxis = "Infektionsdatum / Meldedatum",
-            unreliable = "Dieser Datenpunkt ist noch nicht final."
+            unreliable = "Dieser Datenpunkt ist noch nicht endgültig."
         )
     )
 

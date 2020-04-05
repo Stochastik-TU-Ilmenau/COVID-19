@@ -65,7 +65,7 @@ plots <- lapply(regions, function(country_name) {
             pad.zeros = TRUE
         ))
 
-    plot_repronum(estimates, country_name, language = "de", unreliable = 3)
+    plot_repronum(estimates, country_name, language = "de", unreliable = 2)
 })
 
 out <- lapply(seq_along(plots), function(i) {
@@ -96,7 +96,7 @@ Neben den hier dargestellten Ergebnissen für Deutschland und seine Bundeslände
 - Für die geschätzten Reproduktionszahlen (Linien, linke vertikale Achse) bezieht sich die horizontale Achse auf das zugehörige Infektionsdatum, während sie sich für die neu gemeldeten Fälle (Säulen, rechte vertikale Achse) auf das Meldedatum bezieht. Montage wurden beschriftet.
 - Die Grafiken werden täglich aktualisiert (zuletzt: `r format(Sys.time(), '%d.%m.%Y, %H:%M', tz = "Europe/Berlin")`) und zeigen den Datenstand bis gestern.
 - Zu beachten ist weiterhin, dass das Meldedatum der Fälle aufgrund der Inkubationszeit und der Zeit für die Durchführung der Tests sowie der Meldung an die Behörden wesentlich später liegt als das tatsächliche Infektionsdatum. Der Einfachheit halber wird hier von einer Verzögerung von 7 Tagen ausgegangen. Daher wird auch die Schätzung der Reproduktionszahl **um eine Woche zeitversetzt** zu den gemeldeten Fällen angezeigt.
-- Aufgrund der Meldekette vom Gesundheitsamt des Landkreises über die zuständige Landesbehörde ans Robert-Koch-Institut, werden Daten nachgetragen, für die letzten 3 Tage in nicht zu vernachlässigendem Umfang. Deshalb sind die jeweils **letzten 3 Werte noch nicht vollständig** und werden entsprechend blasser dargestellt.
+- Aufgrund der Meldekette vom Gesundheitsamt des Landkreises über die zuständige Landesbehörde ans Robert-Koch-Institut, werden Daten nachgetragen, für die letzten 3 Tage in nicht zu vernachlässigendem Umfang. Deshalb sind die jeweils **letzten 3 Werte noch nicht endgültig** und werden entsprechend blasser dargestellt.
 - In einer Population, in der keine Gegenmaßnahmen unternommen werden, wird die sogenannte **Basisreproduktionszahl** *R<sub>0</sub>* auf einen Wert zwischen 2,4 und 4,1 geschätzt [(Read et al. 2020)](#ref2). Schätzungen mit höheren Werten könnten durch eine beträchtliche Zahl von außen **eingeschleppter Fälle** erklärt werden.
 -  **Details** findet man im zugehörigen [Bericht](reports/repronum/repronum.pdf) (auf Englisch); der **Code** ist [hier](https://github.com/Stochastik-TU-Ilmenau/COVID-19/blob/gh-pages/estimator.r) verfügbar.
 
