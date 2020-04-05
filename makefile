@@ -1,12 +1,12 @@
-all: index.html RKI.html all.html
+all: index.html germany.html all.html
 
-.PHONY: all index.html RKI.html all.html
+.PHONY: all index.html germany.html all.html
 
 index.html: index.Rmd
 	Rscript -e "rmarkdown::render('index.Rmd')"
 
-RKI.html: RKI.Rmd
-	Rscript -e "rmarkdown::render('RKI.Rmd')"
+germany.html: germany.Rmd
+	Rscript -e "rmarkdown::render('germany.Rmd')"
 
 all.html: all.Rmd
 	Rscript -e "rmarkdown::render('all.Rmd')"
