@@ -34,7 +34,7 @@ today <- today()
 # and they are not completed either since too many combinations...
 # all combinations only in derived data frames (see below)
 #
-ger <- read.csv(paste0('./rki_data/RKI_COVID19_', '2020-03-31', '.csv'))
+ger <- read.csv(paste0('./rki_data/RKI_COVID19_', today, '.csv'))
 # subsetting and reordering: (ignore "Datenstand" and "ObjectId")
 ger <- subset(ger, select=c("Meldedatum", "IdBundesland", "Bundesland",
                             "IdLandkreis", "Landkreis", "AnzahlFall",
