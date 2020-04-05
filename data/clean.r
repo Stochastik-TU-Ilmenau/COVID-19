@@ -34,7 +34,7 @@ today <- today()
 # and they are not completed either since too many combinations...
 # all combinations only in derived data frames (see below)
 #
-ger <- read.csv('./rki_data/RKI_COVID19.csv')
+ger <- read.csv(paste0('./rki_data/RKI_COVID19_', '2020-03-31', '.csv'))
 # subsetting and reordering: (ignore "Datenstand" and "ObjectId")
 ger <- subset(ger, select=c("Meldedatum", "IdBundesland", "Bundesland",
                             "IdLandkreis", "Landkreis", "AnzahlFall",
@@ -136,6 +136,11 @@ lookup_world <- unique(subset(lookup_world,
 missing <- data.frame(iso3=c('CAN', 'AUS', 'CHN', 'USA'),
                       Country_Region=c('Canada', 'Australia', 'China', 'US'))
 lookup_world <- merge(lookup_world, missing, all=TRUE)
+# rename countries:
+levels(lookup_world$Country_Region)[levels(lookup_world$Country_Region)
+                                    == 'Taiwan*'] <- 'Taiwan'
+levels(lookup_world$Country_Region)[levels(lookup_world$Country_Region)
+                                    == 'Korea, South'] <- 'South Korea'
 lookup_world <- lookup_world[-c(1,2),]
 names(lookup_world) <- c('reg0.id', 'reg0.name')
 write.csv(lookup_world, file='./clean/lookup_world_jh.csv', row.names=FALSE)
@@ -214,6 +219,10 @@ world <- world[!(world$reg0.name == 'United Kingdom' & world$reg1.name != ''),]
 # removing ships: Diamond Princess, MS Zaandam
 world <- world[!(world$reg0.name == 'Diamond Princess'),]
 world <- world[!(world$reg0.name == 'MS Zaandam'),]
+# rename countries:
+levels(world$reg0.name)[levels(world$reg0.name) == 'Taiwan*'] <- 'Taiwan'
+levels(world$reg0.name)[levels(world$reg0.name)
+                        == 'Korea, South'] <- 'South Korea'
 # add reg0.id:
 world <- merge(world, lookup_world)
 # reorder:
