@@ -227,7 +227,7 @@ The following is an adaptation of the modelling in \citep{fraser2007} and \cite[
 The number of \term{incidences}, i.e. newly infected cases, at day $t$ will be given as $I(t)$.
 The \term{infection age} of an infected person in days, i.e. the number of day elapsed since the infection, is denoted by $\tau \in \mathbb N_0$.
 
-The spread of the epidemic depends strongly on the time-dependent \term{transmissibility} $\beta(t, \tau) \geq 0$ specifying the expected number of susceptibles an infectious person at infection age $\tau$, a so-called \term{primary case}, will infect at time $t$.
+The spread of the epidemic depends strongly on the time-dependent \term{transmissibility} $\beta(t, \tau) \geq 0$ specifying the expected number of susceptible individuals an infectious person at infection age $\tau$, a so-called \term{primary case}, will infect at time $t$.
 The transmissibility is in particular affected by the \term{contact rate}, i.e. the mean number of people an infected person meets per day, and the \term{infectiousness} of the primary case.
 The former is addressed by \term{non-pharmaceutical interventions} such as school closures and curfews, the latter is a virological feature of the disease.
 Therefore we make a crucial \term{structural assumption}, namely that they separate:
@@ -306,7 +306,174 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 
 %% begin.rcode sim
 % alpha <- 0.05
+library(reticulate)
+#use_python("/usr/bin/python3")
+source_python("../../code/seir.py")
+np <- import('numpy')
+
+# totally random number of people
+n_people <- as.integer(8 * 1e7)
+
+# initially latent people
+n_latent <- as.integer(100)
+
+# time until latent gets infectious
+t1 <- as.integer(3)
+
+# time until infectious enters recovered/dead/non-infectious state
+t2 <- as.integer(4)
+
+# corresponding transition probabilities
+p1 <- 1 / t1
+p2 <- 1 / t2
+
+# time of intervention
+interv <- 40
+
+# basic reproduction number
+R0 <- 3
+
+# infection probability upon contact before intervention
+pc0 <- R0 / t2 
+
+# and after intervention
+pc1 <- pc0 / 2
+
+# number of paths to simulate
+n_sim <- as.integer(1e2)
+
+# time steps
+n_steps <- as.integer(100)
+
+# contact rate across the whole population
+lstArrGInd <- np_array(rep(c(0,1), c(interv, n_steps - interv)), dtype = "int")
+lstArrG <- list(array(pc0, dim = c(1,1)), array(pc1, dim = c(1,1)))
+
+# initial values
+arrSEIR0 <- array(c(n_people, n_latent, 0, 0), dim = c(4, 1))
+
+# inter group contact distribution
+# this is also time dependent
+arrG <- array(1, dim = c(1,1,n_steps))
+
+arrDataStoch <- stochastic(
+    n_sim,
+    arrSEIR0,
+    p1,
+    p2,
+    lstArrGInd,
+    lstArrG,
+    "simulation"
+)
+
+# Matthias Format: "","day","yday","date","reg0.id","reg0.name","tot.cases","tot.dead","tot.recovered","new.cases","new.dead","new.recovered"
+clean_simulation_results <- function(results, startdate = as.Date("2020-01-01"),
+    count.infectious = TRUE) {
+    # dims: (S,E,I,R) x groups x time x simulation
+    arrDataStoch <- results$f[["arrData"]]
+
+    df <- data.frame()
+
+    for (i in 1:dim(arrDataStoch)[4]) {
+        current_simulation <- arrDataStoch[,,,i, drop =F]
+        age_groups_merged <-  drop(apply(current_simulation, c(1,3,4), sum))
+        maxday <- ncol(age_groups_merged)
+        tot.cases <- if(count.infectious) age_groups_merged[3,] + age_groups_merged[4,]
+            else age_groups_merged[2,] + age_groups_merged[3,] + age_groups_merged[4,]
+
+        new_df <- data.frame(
+            day = 1:maxday,
+            yday = 1:maxday,
+            date = seq(startdate, length.out = maxday, by = "1 day"),
+            reg0.id = i,
+            reg0.name = i,
+            tot.cases = tot.cases,
+            tot.dead = 0,
+            tot.recovered = age_groups_merged[4,],
+            new.cases = c(0, diff(tot.cases)),
+            new.dead = 0,
+            new.recovered = c(0, diff(age_groups_merged[4,]))
+        )
+
+        df <- rbind(df, new_df)
+    }
+    df$reg0.id = factor(df$reg0.id)
+    df$reg0.name = factor(df$reg0.name)
+
+    df
+}
+
+sims <- np$load("simulation.npz")
+
+cleaned <- clean_simulation_results(np$load("simulation.npz"), count.infectious = FALSE)
+
+sim <- reshape(cleaned[,c("date", "day", "reg0.id", "new.cases")], v.names="new.cases", idvar="date", timevar="reg0.id", direction="wide")
+sim<- sim[order(sim$date),]
+
+w <- function(tau) {
+    ifelse(tau == 1, 0, p1 * ( (1-p2)^(tau-1) - (1-p1)^(tau-1) ) / (p1 - p2) )
+}
+
+sim.infectivity <- w(1:50)
+names(sim.infectivity) <- seq_along(sim.infectivity)
+sim.infectivity <- sim.infectivity / sum(sim.infectivity)
+barplot(c("0" = 0, sim.infectivity[1:30]))
+
+width <- 1
+
+sim.est <- apply(sim[,-(1:2)], 2, repronum,
+    profile = sim.infectivity,
+    window = width,
+    delay = 0,
+    conf.level = 1-alpha,
+    pad.zeros = TRUE
+)
 %% end.rcode
+
+%% begin.rcode simPlotSingle
+# first simulation
+with(cbind(sim[,1:2], sim.est[[1]]), {
+    plot(day, repronum, type = "l", log = "", lwd = 2,
+        xlim = c(min(day[!is.na(repronum)]), max(day)), ylim = c(1, 5),
+        xlab = "day", ylab = "R(t)",
+        main = "Reproduction number for first simulation",
+        sub = paste("window width =", width), axes = TRUE)
+    abline(h = 1, col = "red")
+    abline(h = c(R0), col = "red", lty = 3)
+    abline(v = interv + 0.5, col = "red", lty = 3)
+    lines(day, ci.lower, lty = 2)
+    lines(day, ci.upper, lty = 2)
+})
+%% end.rcode
+
+To validate the estimator, we simulate a \term{stochastic SEIR} (a.k.a. Kermack-McKendrick) \term{model}.
+It is a discrete-time Markov chain describing a population of $n = \rinline{n_people}$ people with each individual being in one of four states: \term{susceptible}, i.e. not yet infected, \term{latent}, i.e. infected but not yet infectious, \term{infectious} or \term{recovered} and thus immune.
+We start at time $0$ with $\rinline{n_latent}$ latent individuals, all others initially being susceptible.
+At each time step, a susceptible person becomes infected if it meets an infectious person which happens independently with probability $p_S$, a latent person becomes infectious with probability $p_I$, and an infectious person recovers with probability $p_R$; otherwise an individual remains in its state.
+
+This results in incubation times, i.e. times spent in the latent state, which are geometrically distributed with mean $\frac1{p_I}$; for this to be $\rinline{t1}$, we set $p_I = \frac1{\rinline{t1}}$.
+Similarly, the infectious period is geometrically distributed with mean $\frac1{p_R}$ which we would like to be $\rinline{t2}$, so we set $p_R = \frac1{\rinline{t1}}$.
+The basic reproduction rate is then given by $R_0 = \frac{n p_S}{p_R}$ since an infected person on average infects $n p_S$ individuals per day (if all were susceptible) for $\frac1{p_R}$ days on average.
+In order to simulate an epidemic with $R_0 = \rinline{R0}$, we set $p_S = \frac{R_0 p_R}n$ accordingly.
+
+Over time, the reproduction number changes because more people recover and become immune: $R(t)$ is $R_0$ times the proportion of susceptible individuals at that time.
+In addition, we assume that countermeasures have been imposed at time $\rinline{interv}$, resulting $p_S$ afterwards being half of what it was before.
+
+- both latent period and infectious period are geometrically distributed with parameters $p_1 = \frac 1{t_1}$ and $p_2 = \frac 1{t_2}$, respectively
+- we need to compute the convolution (summing over time $s$ of getting infectious): for $\tau > 1$, $p_1 \neq p_2$
+
+\begin{align}
+w(\tau) &= \sum_{s=1}^{\tau - 1} p_1 (1 - p_1)^{s-1} (1-p_2)^{\tau-1-s}
+\\&= p_1 (1-p_2)^{\tau-2} \sum_{s=0}^{\tau - 2} \biggl( \frac{1 - p_1}{1-p_2} \biggr)^s
+\\&= p_1 (1-p_2)^{\tau-2} \frac{1 - \bigl( \frac{1 - p_1}{1-p_2} \bigr)^{\tau-1}}{ \frac{p_1 - p_2}{1 - p_2} }
+\\&= p_1 (1-p_2)^{\tau-1} \frac{1 - \bigl( \frac{1 - p_1}{1-p_2} \bigr)^{\tau-1}}{ p_1 - p_2 }
+\\&= p_1 \frac{(1-p_2)^{\tau-1} - (1 - p_1)^{\tau-1}}{ p_1 - p_2 }
+\end{align}
+
+
+- $w(1) = 0$
+
+
 
 - we choose $\alpha=\rinline{alpha*100}\%$ as usual
 
