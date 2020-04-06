@@ -272,18 +272,53 @@ Note that in practice $10$ or more incident cases should suffice for the asympto
 
 %% begin.rcode covid19
 % source("../../estimator.r")
+% infectivity <- c((0:3)/3, 1, (5:0)/5)
+% names(infectivity) <- seq_along(infectivity)
+% infectivity <- infectivity / sum(infectivity)
 %% end.rcode
 
-$w(0)$
+As COVID-19 is a new disease, first being described at the end of 2019, its virological features have not yet been conclusively determined.
+Nonetheless, we tried to choose parameter in agreement with the current state of research.
 
-infectivity profile vs amount of infectious material
+For comparisons, we note that in a population without any countermeasures, the \term{basic reproduction number} $R_0$ is believed to be given by some value between 2.4 and 4.1 \citep{read2020}.
+
+The \term{incubation time}, i.e. the time from infection until symptom onset, ranges from 1 to 14 days with a mean of 5 to 6 days; the virus can be detected from 1 to 2 days before symptom onset for up to 7 to 12 days in moderate cases, and even up to two weeks in severe cases \citep{who2020}.
+We therefore may indeed assume that $w(0) = 0$.
+
+For modelling the infectivity profile $w$, it is important to realise that it is not proportional to the amound of viral specimens that can be detected in an infected person's sputumm, say.
+Indeed, since severe cases are very likely to be hospitalised and thus strictly isolated, the probability of infecting someone more than 12 days are infection is very low.
+Similarly, before symptom onset the probability for transmission might be very low since no sputum is distributed.
+
+The infectivity profile is therefore set to start with $0$ on the first day after infection with a linear increase up to day 4, remaining constant up to day 6 and decaying linearly again until being $0$ at day 11; see Figure~\ref{infProf}.
+
+\begin{figure}[!t]
+%% begin.rcode infProf, fig.width=10, fig.height=6
+barplot(c("0"=0, infectivity) * 100, xlab = "infection age", ylab = "infectivity profile in %")
+%% end.rcode
+\caption{Modelled infectivity profile $w$.}\label{infProf}
+\end{figure}
+
+In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 
 
 \section{Validation on simulated data}
 \label{ValidSim}
 
+%% begin.rcode sim
+% alpha <- 0.05
+%% end.rcode
+
+- we choose $\alpha=\rinline{alpha*100}\%$ as usual
+
 \section{Application to real data}
 \label{ApplReal}
+
+%% begin.rcode real
+% report.delay <- 7
+%% end.rcode
+
+- the **reporting delay** is chosen as the median incubation period plus 2, i.e. \rinline{report.delay} days.
+
 
 \section{Sensitivity analysis}
 \label{SensAnal}

@@ -1,13 +1,9 @@
-# geometric decay:
-#infectivity <- c(0, .5, (1 - 1/6)^(0:21))
-#names(infectivity) <- seq_along(infectivity)
-#infectivity <- infectivity / sum(infectivity)
-# more realistic:
+# infectivity profile:
 infectivity <- c((0:3)/3, 1, (5:0)/5)
 names(infectivity) <- seq_along(infectivity)
 infectivity <- infectivity / sum(infectivity)
 
-width <- 2
+width <- 1
 report.delay <- 7
 alpha <- 0.05
 

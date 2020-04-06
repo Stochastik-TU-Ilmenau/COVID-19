@@ -11,7 +11,7 @@
 - The graphics are **updated daily** (last update: !NOW! GMT), showing data up to yesterday.
 - Note that cases are reported much later than the corresponding day of infection, namely after incubation time (about 5 days [(WHO 2020)](#ref2)) plus some more days necessary for testing and reporting the case to the authorities. For simplicity we assume that cases are reported 7 days after infection. Therefore, estimates for the reproduction number **lag one week behind** the reporting of new cases.
 - In a population where no countermeasures have been put into place, the so-called **basic reproduction number** *R<sub>0</sub>* is believed to be given by some value between 2.4 and 4.1 [(Read et al. 2020)](#ref3). Estimates higher than that might be explained by a considerable number of **imported cases**.
--  **Details** may be found in the accompanying [Technical Report](reports/repronum/repronum.pdf); the **code** is available [here](https://github.com/Stochastik-TU-Ilmenau/COVID-19/blob/gh-pages/estimator.r).
+-  **Details** may be found in the accompanying Technical Report (available soon)<!--[Technical Report](reports/repronum/repronum.pdf)-->; the **code** is available [here](https://github.com/Stochastik-TU-Ilmenau/COVID-19/blob/gh-pages/estimator.r).
 
 ### References
 
