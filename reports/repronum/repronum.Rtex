@@ -194,7 +194,7 @@ And in the future, how can we see whether the epidemic is getting out of hands a
 
 To answer these questions, one needs to know how fast the epidemic is growing.
 In epidemiology, this is measured by the \term{reproduction number}, i.e. the mean number of people someone who got infected will infect in the course of time.
-Its \term{critical value} clearly is $11$: for larger values the epidemic will grow, for smaller values it will diminish.
+Its \term{critical value} clearly is $1$: for larger values the epidemic will grow, for smaller values it will diminish.
 
 Since conditions may change in the future, e.g. when countermeasures are introduced or lifted, this may change.
 We therefore follow \citet{fraser2007} and consider what he calls the \emph{instantaneous} reproduction number $R(t)$ at time $t$, and for which he suggests the estimator
@@ -213,7 +213,7 @@ Then, we apply this methodology to real data from Germany in Section~\ref{ApplRe
 Finally, the results are summarised in Section~\ref{DiscOut}, also discussing difficulties with this approach.
 
 In order to continuously monitor the spread of COVID-19, a designated website has been created where the results of our analysis are shown and updated daily.
-It is available at \url{https://stochastik-tu-ilmenau.github.io/COVID-19/} in English for all affected countries based on the data from \citep{jhu} as well as in German for Germany and its federal states based on the data from \citep{rki} at \url{https://stochastik-tu-ilmenau.github.io/COVID-19/germany.html}.
+It is available at \url{https://stochastik-tu-ilmenau.github.io/COVID-19/} in English for all affected countries based on the data from \citep{jhu} as well as in German for Germany and its federal states based on the data from \citep{rki} at \url{https://stochastik-tu-ilmenau.github.io/COVID-19/germany}.
 We note that a similar analysis using the Bayesian approach of \citep{cori2013} was presented by \citet{abbott2020}.
 However, as of 06/04/2020, the analysis appears not to have been updated since 19/03/2020.
 
@@ -224,7 +224,7 @@ The following is an adaptation of the modelling in \citep{fraser2007} and \cite[
 
 \term{Time} is taken to be discrete, i.e. we consider days $t \in \mathbb Z$, since the spread of the epidemic shows a strong intraday variability (e.g., there are fewer infections during the night when people are at sleep), and the time scales of incubation and infectious period are on the order of days. Also, cases are reported on a daily basis.
 
-The number of number of \term{incidences}, i.e. newly infected cases, at day $t$ will be given as $I(t)$.
+The number of \term{incidences}, i.e. newly infected cases, at day $t$ will be given as $I(t)$.
 The \term{infection age} of an infected person in days, i.e. the number of day elapsed since the infection, is denoted by $\tau \in \mathbb N_0$.
 
 The spread of the epidemic depends strongly on the time-dependent \term{transmissibility} $\beta(t, \tau) \geq 0$ specifying the expected number of susceptibles an infectious person at infection age $\tau$, a so-called \term{primary case}, will infect at time $t$.
@@ -234,7 +234,7 @@ Therefore we make a crucial \term{structural assumption}, namely that they separ
 \eqn{ \beta(t, \tau) = R(t)\, w(\tau) }
 where $R(t) \geq 0$ denotes the (instantaneous) \term{reproduction number} at time $t$ of transmission, i.e. when the \term{secondary case} gets infected by the primary case, and $w(\tau) \in [0,1]$ specifies the \term{infectivity profile} at infection age $\tau$.
 This models the belief that contact rates change over time but the infectiousness of the primary case depends only on $\tau$.
-This is debatable: when rules for isolation or quarantine change are loosend, e.g. because hospital capacities are exhausted, $\beta$ will change differently for different values of $\tau$; we will reiterate this point in Section~\ref{DiscOut}.
+This is debatable: when rules for isolation or quarantine change are loosened, e.g. because hospital capacities are exhausted, $\beta$ will change differently for different values of $\tau$; we will reiterate this point in Section~\ref{DiscOut}.
 It also shows in the fact that any constant factor may be alternatively incorporated into $R$ or $w$.
 The latter is therefore standardised such that
 \eqn{\sum_{\tau = 0}^\infty w(\tau) = 1\,,}
@@ -242,7 +242,7 @@ i.e. $w$ is a \term{probability distribution} which can be interpreted as follow
 $w$ is assumed to be \term{known}; see Section~\ref{SpecCOVID} on how we model it for COVID-19.
 
 In a \term{stochastic model} for the dynamics of the epidemic, $I(t)$ is given as the number of successful transmissions from an infectious person to someone who is susceptible to the disease.
-Assuming that for each possible transmission succeeds independently (thus ignoring the possibility of multiple infections) with a probability corresponding to $\beta$, and if there are many possible transmissions, $I(t)$ will be (approximately) \term{Poisson distributed} conditional on the past with intensity equal to
+Assuming that for each possible transmission succeeds independently (thus ignoring the possibility of multiple infections) with a probability corresponding to $\beta$, and if there are many possible transmissions, $I(t)$ is-- by the law of small numbers -- approximately \term{Poisson distributed} conditional on the past. The intensity of this Poisson distribution is equal to
 \eqn{ \E(I(t) \cond I(t-1), \dots) = \sum_{\tau=1}^\infty \beta(t,\tau) I(t-\tau) = R(t) \sum_{\tau=1}^\infty w(\tau) I(t-\tau)\,. \label{condE}}
 Here, transmissions \term{on the same day} are ruled out, i.e. $w(0) = 0$, which is a realistic assumption since the incubation period will be at least one day.
 
@@ -261,7 +261,7 @@ However, assuming that conditions remain the same in the future, i.e. $R(s) = R(
 This explains why $R(t)$ is called \emph{reproduction number}.
 
 For large intensities, i.e. if the conditional expectation in Equation~\eqref{condE} is large, the distribution of $\hat R(t)$ can be well approximated by a Gaussian distribution, with small standard errors.
-Thus using \term{asymptotic confidence intervals} can be derived, see Section~\ref{ConfInt}.
+From this, \term{asymptotic confidence intervals} can be derived, see Section~\ref{ConfInt}.
 If $q$ denotes the $(1-\frac\alpha 2)$-quantile of the standard normal distribution then
 \eqn{ \Biggl[\hat R(t) - q \sqrt{\frac{\hat R(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}}, \hat R(t) + q \sqrt{\frac{\hat R(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}} \Biggr] }
 is an (asymptotic) $(1-\alpha)$-confidence interval for $R(t)$.
@@ -269,6 +269,10 @@ Note that in practice $10$ or more incident cases should suffice for the asympto
 
 \section{Specifics of COVID-19}
 \label{SpecCOVID}
+
+%% begin.rcode covid19
+% source("../../estimator.r")
+%% end.rcode
 
 $w(0)$
 
