@@ -230,6 +230,7 @@ TSWLatexianTemp*
 
 # Kile
 *.backup
+*.kate-swp
 
 # KBibTeX
 *~[0-9]*

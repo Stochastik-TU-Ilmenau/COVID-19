@@ -31,35 +31,35 @@
 
 \usepackage{amsmath,amsfonts,amssymb}
 % \usepackage{bbold}
-\usepackage{dsfont}
-\usepackage{mathrsfs}
+% \usepackage{dsfont}
+% \usepackage{mathrsfs}
 % \numberwithin{equation}{section}
-\usepackage{textcomp}
-\usepackage[amsmath,thref,thmmarks,hyperref]{ntheorem}
-\theoremseparator{:}
-\theoremsymbol{\raisebox{2pt}{\scriptsize\ensuremath{\Diamond}}}
-\newtheorem{Prop}{Proposition}%[section]
-\newtheorem{Thm}[Prop]{Theorem}
-\newtheorem{Lem}[Prop]{Lemma}
-\newtheorem{Cor}[Prop]{Corollary}
-\theorembodyfont{\upshape}
-\newtheorem{Rem}[Prop]{Remark}
-\newtheorem{Def}[Prop]{Definition}
-\newtheorem{Ex}[Prop]{Example}
-\theoremstyle{nonumberplain}
-\theoremheaderfont{\scshape}
-\theorembodyfont{\upshape}
-\theoremsymbol{\raisebox{1pt}{\scriptsize\ensuremath{\Box}}}
-\newtheorem{Proof}{Proof}
-\newtheorem{Noproof}{Without proof}
+% \usepackage{textcomp}
+% \usepackage[amsmath,thref,thmmarks,hyperref]{ntheorem}
+% \theoremseparator{:}
+% \theoremsymbol{\raisebox{2pt}{\scriptsize\ensuremath{\Diamond}}}
+% \newtheorem{Prop}{Proposition}%[section]
+% \newtheorem{Thm}[Prop]{Theorem}
+% \newtheorem{Lem}[Prop]{Lemma}
+% \newtheorem{Cor}[Prop]{Corollary}
+% \theorembodyfont{\upshape}
+% \newtheorem{Rem}[Prop]{Remark}
+% \newtheorem{Def}[Prop]{Definition}
+% \newtheorem{Ex}[Prop]{Example}
+% \theoremstyle{nonumberplain}
+% \theoremheaderfont{\scshape}
+% \theorembodyfont{\upshape}
+% \theoremsymbol{\raisebox{1pt}{\scriptsize\ensuremath{\Box}}}
+% \newtheorem{Proof}{Proof}
+% \newtheorem{Noproof}{Without proof}
 
 % \newcommand{\gqq}[1]{\glqq{}#1\grqq{}}
-% \newcommand{\eqn}[1]{\begin{equation}#1\end{equation}}
+\newcommand{\eqn}[1]{\begin{equation}#1\end{equation}}
 % \newcommand{\eqns}[1]{\begin{equation*}#1\end{equation*}}
 % \newcommand{\mat}[1]{\begin{pmatrix}#1\end{pmatrix}}
 % \newcommand{\smat}[1]{\bigl(\begin{smallmatrix}#1\end{smallmatrix}\bigr)}
 % \newcommand{\iii}[1]{\begin{enumerate}[(i)]#1\end{enumerate}}
-% \newcommand{\term}[1]{\textbf{#1}}
+\newcommand{\term}[1]{\textbf{#1}}
 % \newcommand{\lang}[2]{\textup{#1} \textsl{#2}}
 % \newcommand{\engl}[1]{\textup{engl.} \textsl{#1}}
 % \newcommand{\lat}[1]{\textsl{#1}}
@@ -174,29 +174,136 @@
 
 \maketitle
 
-\begin{abstract}
-We
-\end{abstract}
+%TODO abstract
+% \begin{abstract}
+% We
+% \end{abstract}
 
 \tableofcontents
 
 \section{Introduction}
 
-\cite{fraser2007}
+As the Coronavirus Disease 2019 (COVID-19) threatens humanity, unprecedented measures to stop its spread have been adopted around the globe.
+In many countries, schools have closed and curfews have been imposed.
+Given the enormous burden these measures place on the economy, sooner or later they have to be relaxed.
+This raises important questions for policymakers and public health specialists.
+How large is the effect of these measures?
+Do they effectively stop the spread of COVID-19?
+What will happen if restrictions get relaxed?
+And in the future, how can we see whether the epidemic is getting out of hands again?
+
+To answer these questions, one needs to know how fast the epidemic is growing.
+In epidemiology, this is measured by the \term{reproduction number}, i.e. the mean number of people someone who got infected will infect in the course of time.
+Its \term{critical value} clearly is $11$: for larger values the epidemic will grow, for smaller values it will diminish.
+
+Since conditions may change in the future, e.g. when countermeasures are introduced or lifted, this may change.
+We therefore follow \citet{fraser2007} and consider what he calls the \emph{instantaneous} reproduction number $R(t)$ at time $t$, and for which he suggests the estimator
+\begin{equation}\label{fraser}
+\hat R(t) = \frac{I(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}
+\end{equation}
+where $I(t)$ is the number of incident cases at time $t$ and $w$ specifies the so-called \term{infectivty profile} which is assumed to be known.
+To the best of our knowledge, this estimator has first been published by Fraser and others in \citep{grassly2006}.
+
+We explain the probabilistic model behind this estimator following \cite[Web Appendix 1]{cori2013} in Section~\ref{DerivEst}.
+In addition, we analytically derive asymptotic confidence intervals (with details given in Appendix~\ref{ConfInt}) which are simple to compute.
+Here, we differ from \citet{grassly2006} who use computationally more elaborate resampling techniques, namely the bootstrap, to obtain confidence intervals; \citet{cori2013} on the other hand take a Bayesian approach, assuming a certain gamma prior distribution for $R(t)$.
+
+The estimator and corresponding confidence intervals are validated on simulated data in Section~\ref{ValidSim}.
+Then, we apply this methodology to real data from Germany in Section~\ref{ApplReal}, followed by a sensitivity analysis in Section~\ref{SensAnal}.
+Finally, the results are summarised in Section~\ref{DiscOut}, also discussing difficulties with this approach.
+
+In order to continuously monitor the spread of COVID-19, a designated website has been created where the results of our analysis are shown and updated daily.
+It is available at \url{https://stochastik-tu-ilmenau.github.io/COVID-19/} in English for all affected countries based on the data from \citep{jhu} as well as in German for Germany and its federal states based on the data from \citep{rki} at \url{https://stochastik-tu-ilmenau.github.io/COVID-19/germany.html}.
+We note that a similar analysis using the Bayesian approach of \citep{cori2013} was presented by \citet{abbott2020}.
+However, as of 06/04/2020, the analysis appears not to have been updated since 19/03/2020.
 
 \section{Derivation of the estimator}
+\label{DerivEst}
+
+The following is an adaptation of the modelling in \citep{fraser2007} and \cite[Web Appendix 1]{cori2013}.
+
+\term{Time} is taken to be discrete, i.e. we consider days $t \in \mathbb Z$, since the spread of the epidemic shows a strong intraday variability (e.g., there are fewer infections during the night when people are at sleep), and the time scales of incubation and infectious period are on the order of days. Also, cases are reported on a daily basis.
+
+The number of number of \term{incidences}, i.e. newly infected cases, at day $t$ will be given as $I(t)$.
+The \term{infection age} of an infected person in days, i.e. the number of day elapsed since the infection, is denoted by $\tau \in \mathbb N_0$.
+
+The spread of the epidemic depends strongly on the time-dependent \term{transmissibility} $\beta(t, \tau) \geq 0$ specifying the expected number of susceptibles an infectious person at infection age $\tau$, a so-called \term{primary case}, will infect at time $t$.
+The transmissibility is in particular affected by the \term{contact rate}, i.e. the mean number of people an infected person meets per day, and the \term{infectiousness} of the primary case.
+The former is addressed by \term{non-pharmaceutical interventions} such as school closures and curfews, the latter is a virological feature of the disease.
+Therefore we make a crucial \term{structural assumption}, namely that they separate:
+\eqn{ \beta(t, \tau) = R(t)\, w(\tau) }
+where $R(t) \geq 0$ denotes the (instantaneous) \term{reproduction number} at time $t$ of transmission, i.e. when the \term{secondary case} gets infected by the primary case, and $w(\tau) \in [0,1]$ specifies the \term{infectivity profile} at infection age $\tau$.
+This models the belief that contact rates change over time but the infectiousness of the primary case depends only on $\tau$.
+This is debatable: when rules for isolation or quarantine change are loosend, e.g. because hospital capacities are exhausted, $\beta$ will change differently for different values of $\tau$; we will reiterate this point in Section~\ref{DiscOut}.
+It also shows in the fact that any constant factor may be alternatively incorporated into $R$ or $w$.
+The latter is therefore standardised such that
+\eqn{\sum_{\tau = 0}^\infty w(\tau) = 1\,,}
+i.e. $w$ is a \term{probability distribution} which can be interpreted as follows: for a fixed time $t$ randomly pick a pair of individuals where the first one is a primary case that got infected at time $t$, in turn infecting the second one later; $w(\tau)$ is the probability that the second case got infected at time $t+\tau$, i.e. at infection age $\tau$ of the primary case.
+$w$ is assumed to be \term{known}; see Section~\ref{SpecCOVID} on how we model it for COVID-19.
+
+In a \term{stochastic model} for the dynamics of the epidemic, $I(t)$ is given as the number of successful transmissions from an infectious person to someone who is susceptible to the disease.
+Assuming that for each possible transmission succeeds independently (thus ignoring the possibility of multiple infections) with a probability corresponding to $\beta$, and if there are many possible transmissions, $I(t)$ will be (approximately) \term{Poisson distributed} conditional on the past with intensity equal to
+\eqn{ \E(I(t) \cond I(t-1), \dots) = \sum_{\tau=1}^\infty \beta(t,\tau) I(t-\tau) = R(t) \sum_{\tau=1}^\infty w(\tau) I(t-\tau)\,. \label{condE}}
+Here, transmissions \term{on the same day} are ruled out, i.e. $w(0) = 0$, which is a realistic assumption since the incubation period will be at least one day.
+
+The last equation suggests the \term{estimator} $\hat R(t)$ for $R(t)$ given in \cite[Equation (9)]{fraser2007},
+\eqn{ \hat R(t) = \frac{I(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}\,. }
+% - taking expectations, the above equation implies the **renewal equation**, cf. Equation (1) in @fraser2007,
+% $$ \mathbb E I(t) = R(t) \sum_{\tau=1}^\infty w(\tau)\ \mathbb E I(t-\tau) $$
+% - for constant $R=R(t)$ this difference equation has the **solution**
+% $$ \mathbb E I(t) = R^t\ \mathbb E I(0) $$
+
+Note that the \term{case reproduction number} $R_c(t)$, i.e. the expected number of people a primary case infected at time $t$ will infect, is given by, cf. \cite[Equations (2) and (8)]{fraser2007},
+\eqn{ R_c(t) = \sum_{\tau=1}^\infty \beta(t+\tau, \tau) = \sum_{\tau=1}^\infty R(t+\tau)\,w(\tau)\,. }
+This is of course difficult or even impossible to estimate as it depends on future contact rates, i.e. on countermeasures that will be imposed.
+However, assuming that conditions remain the same in the future, i.e. $R(s) = R(t)$ for $s > t$, we obtain $R(t)$ again, cf. \cite[Equation (3)]{fraser2007},
+\eqn{ \sum_{\tau=1}^\infty R(t+\tau) w(\tau) = R(t) \sum_{\tau=1}^\infty w(\tau) = R(t)\,.}
+This explains why $R(t)$ is called \emph{reproduction number}.
+
+For large intensities, i.e. if the conditional expectation in Equation~\eqref{condE} is large, the distribution of $\hat R(t)$ can be well approximated by a Gaussian distribution, with small standard errors.
+Thus using \term{asymptotic confidence intervals} can be derived, see Section~\ref{ConfInt}.
+If $q$ denotes the $(1-\frac\alpha 2)$-quantile of the standard normal distribution then
+\eqn{ \Biggl[\hat R(t) - q \sqrt{\frac{\hat R(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}}, \hat R(t) + q \sqrt{\frac{\hat R(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}} \Biggr] }
+is an (asymptotic) $(1-\alpha)$-confidence interval for $R(t)$.
+Note that in practice $10$ or more incident cases should suffice for the asymptotics to be reliable.
 
 \section{Specifics of COVID-19}
+\label{SpecCOVID}
 
-\section{Testing on simulated data}
+$w(0)$
+
+infectivity profile vs amount of infectious material
+
+
+\section{Validation on simulated data}
+\label{ValidSim}
 
 \section{Application to real data}
+\label{ApplReal}
 
 \section{Sensitivity analysis}
+\label{SensAnal}
 
-\section{Comparison with other estimators}
+%TODO \section{Comparison with other estimators}
 
 \section{Discussion and Outlook}
+\label{DiscOut}
+
+incubation period
+
+structural assumption, isolation, medical treatment
+
+infectivity profile vs amount of infectious material
+
+weekday effects
+
+reporting chain
+
+infected vs reported
+
+mean, individual, stratification, regional effects get averaged
+
+imported cases
 
 \paragraph{Acknowledgements.}
 
@@ -205,8 +312,20 @@ The authors thank Dr. med. Luise Prüfer-Krämer, Steering Committee Member, Ger
 \appendix
 
 \section{Derivation of confidence intervals}
+\label{ConfInt}
+
+Starting from Equation~\eqref{condE}, the conditional expectation of $\hat R(t)$ given the past is
+\eqn{ \E(\hat R(t) \cond I(t-1), \dots) = \frac{\mathbb E(I(t) \vert I(t-1), \dots)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)} = R(t)\,. }
+Therefore, $\hat R(t)$ is \term{unbiased},
+\eqn{ \E \hat R(t) = R(t)\,, }
+and the \term{conditional variance} of $\hat R(t)$ is given by
+\eqn{ \Var(\hat R(t) \cond I(t-1), \dots) = \frac{R(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}\,.}
+An application of Slutsky's lemma gives an asymptotic $(1-\alpha)$-confidence interval for $R(t)$: if $q$ denotes the $(1-\frac\alpha 2)$-quantile of the standard normal distribution it is given by
+\eqn{ \Biggl[\hat R(t) - q \sqrt{\frac{\hat R(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}}, \hat R(t) + q \sqrt{\frac{\hat R(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}} \Biggr]\,. }
+Note that (approximate) coverage is always guaranteed conditionally on the past, and hence also without conditioning.
 
 \section{Derivation of the infectivity profile for the SEIR-model}
+\label{InfProfSEIR}
 
 \bibliographystyle{dcu}
 \setlength{\bibsep}{3pt}
