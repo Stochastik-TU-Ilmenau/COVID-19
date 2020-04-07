@@ -14,7 +14,7 @@ der
 in Zusammenarbeit mit
 [Prof. Dr. Alexander Krämer](https://ekvv.uni-bielefeld.de/pers_publ/publ/PersonDetail.jsp?personId=21463&lang=de)
 und
-[Anne Böhle](anne.boehle@uni-bielefeld.de)
+[Anne Böhle](mailto:anne.boehle@uni-bielefeld.de)
 der
 [Fakultät für Gesundheitswissenschaften](https://www.uni-bielefeld.de/gesundhw/index.html), [Universität Bielefeld](https://www.uni-bielefeld.de/).
 
