@@ -3,8 +3,6 @@ title: 'Impressum'
 output: html_document
 ---
 
-## Impressum
-
 für die Webseiten unter [https://stochastik-tu-ilmenau.github.io/COVID-19/](https://stochastik-tu-ilmenau.github.io/COVID-19/)
 
 ### Herausgeber:
