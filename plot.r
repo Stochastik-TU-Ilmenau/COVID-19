@@ -35,6 +35,14 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
     last_estimate <- max(which(!is.na(estimates$repronum)))
     translations <- strings[[language]]
 
+    # make lower limit smaller, otherwise it may look like R = 0 
+    min_y <- min(c(0.3, estimates$repronum), na.rm = TRUE) * .8
+    max_y <- max(c(10, estimates$repronum), na.rm = TRUE)
+
+    # plotly needs log of axis range for log-axis
+    ylim <- log(c(min_y, max_y), base = 10)
+        
+
     if (unreliable > 0) {
         unreliable_estimates <- estimates[
             seq(last_estimate - unreliable - 1, n_dates),
@@ -148,7 +156,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                 #tickmode = "array",
                 tickvals = c(0.1 * (1:9), 1:10),
                 ticktext = c(0.1 * (1:3), " ", 0.5, " ", 0.7, " ", " ", 1:3, " ", 5, " ", 7, " ", " ", 10),
-                range = log(c(min(c(0.3, estimates$ci.lower), na.rm = TRUE), 10), base = 10),
+                range = ylim,
                 gridcolor = "#00000018"
                 ),
             colorway = c("black", "grey", "red", "blue", "black", "grey", "blue"),
