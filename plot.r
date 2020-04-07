@@ -173,7 +173,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                 showline = TRUE,
                 showgrid = TRUE,
                 type = "date",
-                tickformat = if (language == "en") "%d/%m" else "%d.%m",
+                tickformat = if (language == "en") "%d/%m" else "%d.%m.",
                 title = translations$xaxis,
                 gridcolor = "#00000040"
                 ),
