@@ -2,11 +2,23 @@ library(plotly)
 library(magrittr)
 library(lubridate)
 
-mincases <- 30
 
 plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
-    estimates <- estimates %>%
-        filter(tot.cases > mincases)
+    # do not plot anything before first estimate
+    if (is.na(estimates$repronum[1])) {
+        first_non_na_estimate <- min(which(!is.na(estimates$repronum)))
+        estimates <- estimates[-(1:(first_non_na_estimate -1)),]
+    }
+
+    estimates_neighboring_NAs <- estimates[, c("date", "repronum")]
+    for (i in 1:nrow(estimates_neighboring_NAs)) {
+        previous <- if ( i == 1) 0 else estimates$repronum[i - 1]
+        following <- if (i == nrow(estimates)) 0 else estimates$repronum[i + 1]
+
+        if (sum(!is.na(c(previous, following))) == 2) {
+            estimates_neighboring_NAs[i, "repronum"] <- NA
+        }
+    }
 
 
     zero_estimates <- abs(estimates$repronum) < 1e-10
@@ -159,6 +171,16 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             line = list(dash = "dash"),
             showlegend = FALSE,
             hoverinfo = "none"
+        ) %>%
+        add_trace(
+            data = estimates_neighboring_NAs,
+            x = ~date,
+            y = ~repronum,
+            showlegend = FALSE,
+            hoverinfo = "none",
+            mode = "markers",
+            type = "scatter",
+            marker = list(size = 10, color = "black")
         ) %>%
         layout(
             title = translations$title,
