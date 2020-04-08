@@ -8,6 +8,11 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
     estimates <- estimates %>%
         filter(tot.cases > mincases)
 
+
+    zero_estimates <- abs(estimates$repronum) < 1e-10
+    zero_estimates <- zero_estimates[!is.na(zero_estimates)]
+    estimates[zero_estimates, c("repronum", "ci.lower", "ci.upper")] <- NA
+
     strings <- list(
         en = list(
             repno = "reproduction number",
@@ -148,6 +153,13 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                 .
             }
         } %>%
+        add_lines(
+            connectgaps = TRUE,
+            opacity = .2,
+            line = list(dash = "dash"),
+            showlegend = FALSE,
+            hoverinfo = "none"
+        ) %>%
         layout(
             title = translations$title,
             yaxis = list(
