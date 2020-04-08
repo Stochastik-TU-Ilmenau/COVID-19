@@ -42,9 +42,10 @@ on generating tabs in rmarkdown automatically
 # Filter countries with too few cases.
 # Days from "mincases" (see plot.r) to yesterday
 # needs to be "> report.delay" (see estimator.r)
-df_num_days <- subset(johns_hopkins, tot.cases > mincases, select = c(reg0.name, tot.cases))
+df_num_days <- subset(johns_hopkins, select = c(reg0.name, tot.cases))
 num_days <- aggregate(tot.cases ~ reg0.name, df_num_days, length)
 countries <- unique(num_days$reg0.name[num_days$tot.cases > report.delay])
+
 
 plots <- lapply(countries, function(country_name) {
     country <- johns_hopkins %>%
@@ -60,8 +61,17 @@ plots <- lapply(countries, function(country_name) {
             pad.zeros = TRUE
         ))
 
-    plot_repronum(estimates, country_name, language = "en")
+    num.estimates <- sum(!is.na(estimates$repronum))
+    if (num.estimates > 3)  {
+        plot_repronum(estimates, country_name, language = "en")
+    } 
+    else {
+        NA
+    }
 })
+
+countries <- countries[!is.na(plots)]
+plots <- plots[!is.na(plots)]
 
 out <- lapply(seq_along(plots), function(i) {
 
@@ -78,7 +88,7 @@ out <- lapply(seq_along(plots), function(i) {
 
 ##
 
-We show results for all countries with at least `r mincases` cases `r report.delay` days ago. Results for the world and for the 20 most affected countries can be found [here](index.html). In addition, results for Germany and its federal states (Bundesländer) based on official data are available [here](germany.html) (in German).
+We show results for all countries with sufficiently many cases. Results for the world and for the 20 most affected countries can be found [here](index.html). In addition, results for Germany and its federal states (Bundesländer) based on official data are available [here](germany.html) (in German).
 
 ```{r echo=FALSE, results="asis"}
 cat(paste(
