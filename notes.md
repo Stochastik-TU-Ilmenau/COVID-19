@@ -22,4 +22,4 @@
 <a name="ref3">[3]</a>: Read, J.M., Bridgen, J.R.E., Cummings, D.A.T., Ho, A., Jewell, C.P. (2020). *Novel coronavirus 2019-nCoV: early estimation of epidemiological parameters and epidemic predictions.* MedRxiv, Version 2, 01/28/2020, [https://doi.org/10.1101/2020.01.23.20018549](https://doi.org/10.1101/2020.01.23.20018549).
 
 <br/>
-*[Imprint](impressum.html) (in German)*
+*[Imprint](impressum.html#imprint)*
