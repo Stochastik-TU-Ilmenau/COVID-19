@@ -13,7 +13,9 @@ repronum <- function(
     window = 1, # H
     delay = 0, # Delta
     conf.level = 0.95, # 1-alpha
-    pad.zeros = FALSE
+    pad.zeros = FALSE,
+    min.denominator = 10,
+    min.numerator = 10
 ) {
     # pad zeros if desired
     if(pad.zeros) new.cases <- c(rep(0, length(profile) - 1), new.cases)
@@ -27,7 +29,7 @@ repronum <- function(
         method = "convolution", sides = 1))
 
     # estimators
-    repronum <- sum.h.I / sum.htau.wI
+    repronum <- ifelse(sum.h.I < min.numerator, NA, sum.h.I) / ifelse(sum.htau.wI < min.denominator, NA, sum.htau.wI)
 
     # standard errors
     repronum.se <- sqrt(repronum / sum.htau.wI)
