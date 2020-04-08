@@ -1,6 +1,8 @@
 ---
 title: 'Monitoring der Ausbreitung von COVID-19 durch Schätzen der Reproduktionszahl im Verlauf der Zeit'
-output: html_document
+output:
+  html_document:
+    theme: lumen
 ---
 
 Erstellt von
@@ -35,7 +37,7 @@ ger_tot <- read.csv("data/clean/data_ger_tot.csv")
 
 ```
 
-## {.tabset .tabset-fade}
+## {.tabset .tabset-fade .tabset-pills}
 
 <!--
 See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450

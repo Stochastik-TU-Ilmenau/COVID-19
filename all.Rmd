@@ -1,6 +1,8 @@
 ---
 title: 'Monitoring the spread of COVID-19 by estimating reproduction numbers over time'
-output: html_document
+output:
+  html_document:
+    theme: lumen
 ---
 
 Created by
@@ -30,7 +32,7 @@ source("estimator.r")
 johns_hopkins <- read.csv("data/clean/data_world_jh.csv")
 ```
 
-## {.tabset .tabset-fade}
+## {.tabset .tabset-fade .tabset-pills}
 
 <!--
 See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450

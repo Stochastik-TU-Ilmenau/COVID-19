@@ -30,27 +30,24 @@ def arcgis_query(offset = 0, chunk_size = 1):
 
 data = arcgis_query()
 
-#with open('chunk_' + str(offset) + '.json', 'w') as f:
-#    json.dump(data, f)
-
 header = data["fields"]
 #cases = data["features"]
 
 header = [h["name"] for h in header]
 #print(header)
 
-#data = json.loads(data)
 f = csv.writer(open("rki_data/RKI_COVID19.csv", "w+"))
-# Write CSV Header, If you dont need that, remove this line
+# Write CSV Header
 f.writerow(header)
-
-# how too convert the strange arcgis time format:
-# datetime.fromtimestamp(int(query["Meldedatum"] / 1000.0))
 
 def csv_add_lines(file, cases):
     for c in cases:
         row = [c["attributes"][h] for h in header]
+        # convert the strange arcgis time format:
+        # Meldedatum:
         row[8] = datetime.fromtimestamp(int(row[8] / 1000.0))
+        # Refdatum:
+        row[13] = datetime.fromtimestamp(int(row[13] / 1000.0))
         # print(row)
         file.writerow(row)
 
