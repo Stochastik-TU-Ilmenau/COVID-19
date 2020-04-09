@@ -75,7 +75,7 @@ out <- lapply(seq_along(plots), function(i) {
   a1 <- knitr::knit_expand(text = sprintf("### %s\n", countries[i]))
 
   # start r chunk
-  a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10}")
+  a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE}")
 
   # extract graphs by "writing" out `hcs[[1]]`,
   # `hcs[[2]]` etc. to be rendered later
