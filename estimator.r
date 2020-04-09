@@ -14,8 +14,8 @@ repronum <- function(
     delay = 0, # Delta
     conf.level = 0.95, # 1-alpha
     pad.zeros = FALSE,
-    min.denominator = 10,
-    min.numerator = 10
+    min.denominator = 5,
+    min.numerator = 5
 ) {
     # pad zeros if desired
     if(pad.zeros) new.cases <- c(rep(0, length(profile) - 1), new.cases)
