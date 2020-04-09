@@ -39,9 +39,6 @@ See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
 on generating tabs in rmarkdown automatically
 -->
 ```{r, echo = F, warning = F, message = F}
-# Filter countries with too few cases.
-# Days from "mincases" (see plot.r) to yesterday
-# needs to be "> report.delay" (see estimator.r)
 df_num_days <- subset(johns_hopkins, select = c(reg0.name, tot.cases))
 num_days <- aggregate(tot.cases ~ reg0.name, df_num_days, length)
 countries <- unique(num_days$reg0.name[num_days$tot.cases > report.delay])
@@ -76,7 +73,7 @@ plots <- plots[!is.na(plots)]
 out <- lapply(seq_along(plots), function(i) {
 
   a1 <- knitr::knit_expand(text = sprintf("### %s\n", countries[i])) # tab header, auto extracts names of `hcs`
-  a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10}") # start r chunk
+  a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE}") # start r chunk
   a3 <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i)) # extract graphs by "writing" out `hcs[[1]]`, `hcs[[2]]` etc. to be rendered later
   a4 <- knitr::knit_expand(text = "\n```\n") # end r chunk
 

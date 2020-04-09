@@ -10,17 +10,6 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
         estimates <- estimates[-(1:(first_non_na_estimate -1)),]
     }
 
-    estimates_neighboring_NAs <- estimates[, c("date", "repronum")]
-    for (i in 1:nrow(estimates_neighboring_NAs)) {
-        previous <- if ( i == 1) 0 else estimates$repronum[i - 1]
-        following <- if (i == nrow(estimates)) 0 else estimates$repronum[i + 1]
-
-        if (sum(!is.na(c(previous, following))) == 2) {
-            estimates_neighboring_NAs[i, "repronum"] <- NA
-        }
-    }
-
-
     zero_estimates <- abs(estimates$repronum) < 1e-10
     zero_estimates <- zero_estimates[!is.na(zero_estimates)]
     estimates[zero_estimates, c("repronum", "ci.lower", "ci.upper")] <- NA
@@ -76,7 +65,15 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             ] <- NA
     }
 
+    estimates_neighboring_NAs <- estimates[, c("date", "repronum")]
+    for (i in 1:nrow(estimates_neighboring_NAs)) {
+        previous <- if ( i == 1) 0 else estimates$repronum[i - 1]
+        following <- if (i == nrow(estimates)) 0 else estimates$repronum[i + 1]
 
+        if (sum(!is.na(c(previous, following))) == 2) {
+            estimates_neighboring_NAs[i, "repronum"] <- NA
+        }
+    }
 
     first_monday <- ymd("2020-01-06")
     plot_ly(estimates, x= ~date, y= ~repronum) %>%
@@ -166,6 +163,9 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             }
         } %>%
         add_lines(
+            data = estimates,
+            x = ~date,
+            y = ~repronum,
             connectgaps = TRUE,
             opacity = .2,
             line = list(dash = "dash"),
@@ -180,7 +180,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             hoverinfo = "none",
             mode = "markers",
             type = "scatter",
-            marker = list(size = 10, color = "black")
+            marker = list(size = 5, color = "black")
         ) %>%
         layout(
             title = translations$title,
