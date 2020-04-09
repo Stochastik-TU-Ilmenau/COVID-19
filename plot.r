@@ -172,7 +172,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             hoverinfo = "none"
         ) %>%
         add_trace(
-            data = estimates_neighboring_NAs,
+            data = estimates,
             x = ~date,
             y = ~repronum,
             showlegend = FALSE,

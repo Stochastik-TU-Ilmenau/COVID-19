@@ -58,9 +58,9 @@ plots <- lapply(countries, function(country_name) {
         ))
 
     num.estimates <- sum(!is.na(estimates$repronum))
-    if (num.estimates > 3)  {
+    if (num.estimates >= 3)  {
         plot_repronum(estimates, country_name, language = "en")
-    } 
+    }
     else {
         NA
     }
