@@ -43,7 +43,6 @@ df_num_days <- subset(johns_hopkins, select = c(reg0.name, tot.cases))
 num_days <- aggregate(tot.cases ~ reg0.name, df_num_days, length)
 countries <- unique(num_days$reg0.name[num_days$tot.cases > report.delay])
 
-
 plots <- lapply(countries, function(country_name) {
     country <- johns_hopkins %>%
         filter(reg0.name == country_name) %>%
