@@ -2,7 +2,6 @@ library(plotly)
 library(magrittr)
 library(lubridate)
 
-
 plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
     # do not plot anything before first estimate
     if (is.na(estimates$repronum[1])) {
