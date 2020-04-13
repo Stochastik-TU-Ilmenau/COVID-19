@@ -272,7 +272,47 @@ Note that in practice $10$ or more incident cases should suffice for the asympto
 \label{SpecCOVID}
 
 %% begin.rcode covid19
-% source("../../estimator.r")
+# the estimator
+% #source("../../estimator.r")
+
+repronum <- function(
+    new.cases, # I
+    profile, # w
+    delay = 0, # Delta
+    conf.level = 0.95, # 1-alpha
+    pad.zeros = TRUE
+) {
+    # pad zeros if desired
+    if(pad.zeros) new.cases <- c(rep(0, length(profile) - 1), new.cases)
+
+    # compute convolution over tau
+    denominator <- as.numeric(stats::filter(new.cases, c(0, profile),
+        method = "convolution", sides = 1))
+
+    # estimates
+    repronum <- new.cases / denominator
+
+    # standard errors
+    repronum.se <- sqrt(repronum / denominator) + 1 / 8 / sqrt(repronum) / denominator / sqrt(denominator)
+
+    # shift by delay
+    repronum <- c(repronum, rep(NA, delay))[(1:length(repronum)) + delay]
+    repronum.se <- c(repronum.se,
+        rep(NA, delay))[(1:length(repronum.se)) + delay]
+
+    # standard normal qunatile
+    q <- qnorm(1 - (1-conf.level) / 2)
+
+    # return data.frame with as many rows as new.cases
+    ret <- data.frame(
+        repronum = repronum,
+        repronum.se = repronum.se,
+        ci.lower = repronum - q * repronum.se,
+        ci.upper = repronum + q * repronum.se
+    )
+    if(pad.zeros) ret[-(1:(length(profile)-1)),] else ret
+}
+
 % infectivity <- c((0:3)/3, 1, (5:0)/5)
 % names(infectivity) <- seq_along(infectivity)
 % infectivity <- infectivity / sum(infectivity)
@@ -294,7 +334,8 @@ The infectivity profile is therefore set to start with $0$ on the first day afte
 
 \begin{figure}[!t]
 %% begin.rcode infProf
-barplot(c("0"=0, infectivity) * 100, xlab = "infection age", ylab = "infectivity profile in %")
+% par(mar=c(4,4,0,0)+0.1)
+% barplot(c("0"=0, infectivity) * 100, xlab = "infection age", ylab = "infectivity profile in %")
 %% end.rcode
 \caption{Modelled infectivity profile $w$.}\label{infProf}
 \end{figure}
@@ -307,7 +348,7 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 
 %% begin.rcode sim
 % library(reticulate)
-% #use_python("/usr/bin/python3")
+% use_python("/usr/bin/python3")
 % source_python("../../code/seir.py")
 % np <- import('numpy')
 % 
@@ -328,11 +369,11 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 % pR <- 1 / tR
 % 
 % # times of intervention
-% interv1 <- 20
-% interv2 <- 40
+% interv1 <- 30
+% interv2 <- 50
 % 
 % # basic reproduction number
-% R0 <- 3
+% R0 <- 2.5
 % 
 % # reproduction numbers after first and section intervention
 % R1 <- 0.7
@@ -346,7 +387,7 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 % pc2 <- R2 * pR 
 % 
 % # number of paths to simulate
-% n_sim <- as.integer(1e4)
+% n_sim <- as.integer(1e2)
 % 
 % # time steps
 % n_steps <- as.integer(120)
@@ -388,36 +429,68 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 % sim.infectivity <- w(1:50)
 % names(sim.infectivity) <- seq_along(sim.infectivity)
 % sim.infectivity <- sim.infectivity / sum(sim.infectivity)
-% barplot(c("0" = 0, sim.infectivity[1:30]))
 % 
 % alpha <- 0.05
-% width <- 1
 % 
 % sim.est <- apply(new.infected, 2, repronum,
 %     profile = sim.infectivity,
-%     window = width,
 %     delay = 0,
 %     conf.level = 1-alpha,
 %     pad.zeros = TRUE
 % )
 %% end.rcode
 
+\begin{figure}[!bth]
+%% begin.rcode simPlotInfect
+% par(mar=c(4,4,0,0)+0.1)
+% barplot(c("0" = 0, sim.infectivity[1:30]) * 100, xlab = "infection age", ylab = "infectivity profile in %")
+%% end.rcode
+\caption{Computed infectivity profile $w$ corresponding to the simulation.}\label{simPlotInfect}
+\end{figure}
+
+
+To validate the estimator, we simulate a \term{stochastic SEIR} (a.k.a. Kermack-McKendrick) \term{model}.
+To be more precise, we consider a discrete-time Markov chain describing a population of $n = \rinline{n_people/1e6}$~million people with each individual being in one of four states: \term{susceptible}, i.e. not yet infected; \term{latent}, i.e. infected but not yet infectious; \term{infectious}; or \term{recovered} and thus immune.
+We start at time $0$ with $\rinline{n_latent}$ latent individuals, all others initially being susceptible.
+At each time step, a susceptible person becomes infected if it meets an infectious person which happens independently with probability $p_S$, a latent person becomes infectious with probability $p_I$, and an infectious person recovers with probability $p_R$; otherwise an individual remains in its state.
+
+This results in incubation times, i.e. times spent in the latent state, which are geometrically distributed with mean $\frac1{p_I}$; for this to be $\rinline{tI}$, we set $p_I = \frac1{\rinline{tI}}$.
+Similarly, the infectious period is geometrically distributed with mean $\frac1{p_R}$ which we would like to be $\rinline{tR}$, so we set $p_R = \frac1{\rinline{tR}}$.
+The corresponding infectivity profile $w$ is then given by the convolution of these two geometric convolutions.
+It can be calculated analytically, see Appendix~\ref{InfProfSEIR} for details; the result is shown in Figure~\ref{simPlotInfect}.
+Note that $w(1) = w(0) = 0$ since it takes at least one day to become latent and another one to become infectious in this model.
+
+The basic reproduction rate is then given by $R_0 = \frac{n p_S}{p_R}$ since an infected person on average infects $n p_S$ individuals per day (if all were susceptible) for $\frac1{p_R}$ days on average.
+In order to simulate an epidemic with $R_0 = \rinline{R0}$, we set $p_S = \frac{R_0 p_R}n$ accordingly.
+
+Over time, the reproduction number changes naturally because more people recover and become immune: $R(t)$ is $R_0$ times the proportion of susceptible individuals at that time.
+In addition, we assume that countermeasures have been imposed at time $\rinline{interv1}$, resulting in $R(t)$ being $\rinline{R1}$ times the proportion of susceptibles afterwards, and that measures have been relaxed at time $\rinline{interv2}$, resulting in $R(t)$ being $\rinline{R2}$ times the proportion of susceptibles thereafter.
+
+Figure~\ref{simPlotSEIR} shows one simulation run.
+The resulting estimates $\hat R(t)$ and pointwise \rinline{100 * (1-alpha)}\%-confidence intervals ($\alpha = \rinline{100 * alpha}\%$ as usual) can be compared with the true reproduction rate $R(t)$ in Figure~\ref{simPlotSingle}.
+
+\begin{figure}[!bth]
 %% begin.rcode simPlotSEIR
 % # proportion of susceptibles
 % prop.S <- sims["S",,] / n_people
 % 
-% par(mar=par()$mar + c(0,0,0,2))
+% par(mar=c(4,4,0,4)+0.1)
 % plot(1:n_steps, new.infected[,1], type = "l", log = "", lwd = 2,
 %     xlab = "day", ylab = "newly infected / newly infectious")
 % lines(1:n_steps, new.infectious[,1], col="purple", lwd = 2)
 % abline(v = c(interv1, interv2) + 0.5, col = "red", lty = 3)
+% abline(h = 0, col = "grey80")
 % par(new = TRUE)
-% plot(1:n_steps, prop.S[,1], type = "l", log = "", lwd = 2,
-%     col = "blue", xlab = "", ylab = "", axes = FALSE)
+% plot(1:n_steps, prop.S[,1] * 100, type = "l", log = "", lwd = 2,
+%     col = "blue", xlab = "", ylab = "", lty = 2, axes = FALSE)
+% abline(h = 1, col = rgb(0.5,0.5,1), lty = 2)
 % axis(4)
-% mtext("proportion of susceptibles", 4, 3)
+% mtext("proportion of susceptibles in %", 4, 3)
 %% end.rcode
+\caption{One simulation of the SEIR model; black solid line: newly infected, purple solid line: newly infectious; dashed blue line: proportion of susceptibles; vertical red dotted lines: intervention times.}\label{simPlotSEIR}
+\end{figure}
 
+\begin{figure}[!tbh]
 %% begin.rcode simPlotSingle
 % # true R
 % R <- rep(c(R0, R1, R2), diff(c(0, interv1, interv2, n_steps))) * prop.S[,1]
@@ -434,49 +507,27 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 %     lines(1:n_steps, R, col = "blue", lty = 1, lwd = 2)
 % })
 %% end.rcode
+\caption{One simulation of the SEIR model; black solid line: $\hat R(t)$; black dashed lines: pointwise \rinline{100 * (1-alpha)}\%-confidence intervals; blue solid line: $R(t)$; vertical red dotted lines: intervention times; horizontal red lines: corresponding reproduction numbers without decrease in susceptibles taken into account.}\label{simPlotSingle}
+\end{figure}
 
+The simulation has been repeated \rinline{n_sim} times, and for each time point the proportion of confidence intervals containing the true reproduction number has been determined, see Figure~\ref{simCover}.
+They appear not quite to have the desired nominal coverage but given that they are only asymptotic confidence intervals, and modelling errors are typically much larger they appear acceptable in practice.
+
+\begin{figure}[!tbh]
 %% begin.rcode simCover
-coverage <- sapply(1:n_sim, function(i) {
-    se <- sim.est[[i]]
-    true.R <- rep(c(R0, R1, R2), diff(c(0, interv1, interv2, n_steps))) * prop.S[,i]
-    se$ci.lower <= true.R & se$ci.upper >= true.R
-})
-plot(rowMeans(coverage), type = "l", xlab = "day", ylab = "coverage probability",
-    main = "Coverage probability in simulations", ylim = 0:1, lwd = 1)
-abline(h = 1-alpha, col = "red", lty = 2)
+% coverage <- sapply(1:n_sim, function(i) {
+%     se <- sim.est[[i]]
+%     true.R <- rep(c(R0, R1, R2), diff(c(0, interv1, interv2, n_steps))) * prop.S[,i]
+%     se$ci.lower <= true.R & se$ci.upper >= true.R
+% })
+% plot(rowMeans(coverage) * 100, type = "l", xlab = "day", ylab = "coverage probability",
+%     main = "Coverage probability in %", ylim = 0:1, lwd = 1)
+% abline(h = 1-alpha, col = "blue", lty = 2)
+% abline(v = c(interv1, interv2) + 0.5, col = "red", lty = 3)
 %% end.rcode
+\caption{Estimated coverage probability based on \rinline{n_sim} simulations (black solid line); horizontal blue dahed line: nominal coverage (\rinline{100 * (1-alpha)}\%); vertical red dotted lines: intervention times.}\label{simCover}
+\end{figure}
 
-
-To validate the estimator, we simulate a \term{stochastic SEIR} (a.k.a. Kermack-McKendrick) \term{model}.
-It is a discrete-time Markov chain describing a population of $n = \rinline{n_people}$ people with each individual being in one of four states: \term{susceptible}, i.e. not yet infected, \term{latent}, i.e. infected but not yet infectious, \term{infectious} or \term{recovered} and thus immune.
-We start at time $0$ with $\rinline{n_latent}$ latent individuals, all others initially being susceptible.
-At each time step, a susceptible person becomes infected if it meets an infectious person which happens independently with probability $p_S$, a latent person becomes infectious with probability $p_I$, and an infectious person recovers with probability $p_R$; otherwise an individual remains in its state.
-
-This results in incubation times, i.e. times spent in the latent state, which are geometrically distributed with mean $\frac1{p_I}$; for this to be $\rinline{tI}$, we set $p_I = \frac1{\rinline{tI}}$.
-Similarly, the infectious period is geometrically distributed with mean $\frac1{p_R}$ which we would like to be $\rinline{tI}$, so we set $p_R = \frac1{\rinline{tR}}$.
-The basic reproduction rate is then given by $R_0 = \frac{n p_S}{p_R}$ since an infected person on average infects $n p_S$ individuals per day (if all were susceptible) for $\frac1{p_R}$ days on average.
-In order to simulate an epidemic with $R_0 = \rinline{R0}$, we set $p_S = \frac{R_0 p_R}n$ accordingly.
-
-Over time, the reproduction number changes naturally because more people recover and become immune: $R(t)$ is $R_0$ times the proportion of susceptible individuals at that time.
-In addition, we assume that countermeasures have been imposed at time $\rinline{interv1}$, resulting $p_S$ afterwards being half of what it was before.
-
-- both latent period and infectious period are geometrically distributed with parameters $p_1 = \frac 1{t_1}$ and $p_2 = \frac 1{t_2}$, respectively
-- we need to compute the convolution (summing over time $s$ of getting infectious): for $\tau > 1$, $p_1 \neq p_2$
-
-\begin{align}
-w(\tau) &= \sum_{s=1}^{\tau - 1} p_1 (1 - p_1)^{s-1} (1-p_2)^{\tau-1-s}
-\\&= p_1 (1-p_2)^{\tau-2} \sum_{s=0}^{\tau - 2} \biggl( \frac{1 - p_1}{1-p_2} \biggr)^s
-\\&= p_1 (1-p_2)^{\tau-2} \frac{1 - \bigl( \frac{1 - p_1}{1-p_2} \bigr)^{\tau-1}}{ \frac{p_1 - p_2}{1 - p_2} }
-\\&= p_1 (1-p_2)^{\tau-1} \frac{1 - \bigl( \frac{1 - p_1}{1-p_2} \bigr)^{\tau-1}}{ p_1 - p_2 }
-\\&= p_1 \frac{(1-p_2)^{\tau-1} - (1 - p_1)^{\tau-1}}{ p_1 - p_2 }
-\end{align}
-
-
-- $w(1) = 0$
-
-
-
-- we choose $\alpha=\rinline{alpha*100}\%$ as usual
 
 \section{Application to real data}
 \label{ApplReal}
@@ -535,6 +586,19 @@ Note that (approximate) coverage is always guaranteed conditionally on the past,
 
 \section{Derivation of the infectivity profile for the SEIR-model}
 \label{InfProfSEIR}
+
+Both latent period and infectious period are geometrically distributed with parameters $p_I = \frac 1{t_I}$ and $p_R = \frac 1{t_R}$, respectively.
+We need to compute the convolution (summing over time $s$ of getting infectious).
+For $\tau > 1$ and assuming $p_I > p_R$ (the other cases are similar), we obtain
+\begin{align}
+w(\tau) &= \sum_{s=1}^{\tau - 1} p_I (1 - p_I)^{s-1} (1-p_R)^{\tau-1-s}
+= p_I (1-p_R)^{\tau-2} \sum_{s=0}^{\tau - 2} \biggl( \frac{1 - p_I}{1-p_R} \biggr)^s
+\notag\\&= p_I (1-p_R)^{\tau-2} \frac{1 - \bigl( \frac{1 - p_I}{1-p_R} \bigr)^{\tau-1}}{ \frac{p_I - p_R}{1 - p_R} }
+= p_I (1-p_R)^{\tau-1} \frac{1 - \bigl( \frac{1 - p_I}{1-p_R} \bigr)^{\tau-1}}{ p_I - p_R }
+\notag\\&= p_I \frac{(1-p_R)^{\tau-1} - (1 - p_I)^{\tau-1}}{ p_I - p_R }\,.
+\end{align}
+
+
 
 \bibliographystyle{dcu}
 \setlength{\bibsep}{3pt}
