@@ -78,14 +78,7 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
     plot_ly(estimates, x= ~date, y= ~repronum) %>%
         add_lines(
             name = translations$repno,
-            hovertemplate = paste0(
-                "<b>", translations$date, "</b>: %{x|", if(language == "en") "%d/%m/%Y" else "%d.%m.%Y", "}",
-                "<br><b>", translations$est_repno, "</b>: %{y:.2f}",
-                "<br><b>", translations$ci, "</b>: %{text}",
-                "<extra></extra>" # remove extra information
-            ),
-            text = ~sprintf("[%.2f, %.2f]", ci.lower, ci.upper),
-            hoverinfo = "text"
+            hoverinfo = "none"
         ) %>%
         add_ribbons(
             ymin = ~ci.lower,
@@ -119,6 +112,17 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                     name = translations$repno,
                     x = ~date,
                     y = ~repronum,
+                    hoverinfo = "none",
+                    showlegend = FALSE,
+                    opacity = 0.3,
+                    line = list(dash = "dot")
+                ) %>%
+                add_trace(.,
+                    data = unreliable_estimates,
+                    mode = "markers",
+                    type = "scatter",
+                    x = ~date,
+                    y = ~repronum,
                     hovertemplate = paste0(
                         "<b>", translations$date, "</b>: %{x|", if(language == "en") "%d/%m/%Y" else "%d.%m.%Y", "}",
                         "<br><b>", translations$est_repno, "</b>: %{y:.2f}",
@@ -129,9 +133,9 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                     text = ~sprintf("[%.2f, %.2f]", ci.lower, ci.upper),
                     hoverinfo = "text",
                     showlegend = FALSE,
-                    opacity = 0.3,
-                    line = list(dash = "dot")
-                    ) %>%
+                    opacity = 0.6,
+                    marker = list(color = "black", size = 5)
+                ) %>%
                 add_ribbons(
                     data = unreliable_estimates,
                     x = ~date,
@@ -139,7 +143,9 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                     ymax = ~ci.upper,
                     opacity = .1,
                     hoverinfo = "none",
-                    showlegend = FALSE
+                    showlegend = FALSE,
+                    fillcolor = "grey",
+                    line = list(color = "grey")
                 ) %>%
                 add_bars(
                     data = unreliable_cases,
@@ -154,7 +160,8 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
                     ),
                     hoverinfo = "text",
                     name = translations$new_cases,
-                    showlegend = FALSE
+                    showlegend = FALSE,
+                    marker = list(color = "blue")
                 )
             }
             else {
@@ -176,7 +183,14 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             x = ~date,
             y = ~repronum,
             showlegend = FALSE,
-            hoverinfo = "none",
+            hovertemplate = paste0(
+                "<b>", translations$date, "</b>: %{x|", if(language == "en") "%d/%m/%Y" else "%d.%m.%Y", "}",
+                "<br><b>", translations$est_repno, "</b>: %{y:.2f}",
+                "<br><b>", translations$ci, "</b>: %{text}",
+                "<extra></extra>" # remove extra information
+            ),
+            text = ~sprintf("[%.2f, %.2f]", ci.lower, ci.upper),
+            hoverinfo = "text",
             mode = "markers",
             type = "scatter",
             marker = list(size = 5, color = "black")
