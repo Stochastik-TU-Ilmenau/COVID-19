@@ -248,7 +248,7 @@ Assuming that for each possible transmission succeeds independently (thus ignori
 Here, transmissions \term{on the same day} are ruled out, i.e. $w(0) = 0$, which is a realistic assumption since the incubation period will be at least one day.
 
 The last equation suggests the \term{estimator} $\hat R(t)$ for $R(t)$ given in \cite[Equation (9)]{fraser2007},
-\eqn{ \hat R(t) = \frac{I(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}\,. }
+\eqn{ \hat R(t) = \frac{I(t)}{\sum_{\tau=1}^\infty w(\tau) I(t-\tau)}\,. \label{estim}}
 % - taking expectations, the above equation implies the **renewal equation**, cf. Equation (1) in @fraser2007,
 % $$ \mathbb E I(t) = R(t) \sum_{\tau=1}^\infty w(\tau)\ \mathbb E I(t-\tau) $$
 % - for constant $R=R(t)$ this difference equation has the **solution**
@@ -332,7 +332,7 @@ Similarly, before symptom onset the probability for transmission might be very l
 
 The infectivity profile is therefore set to start with $0$ on the first day after infection with a linear increase up to day 4, remaining constant up to day 6 and decaying linearly again until being $0$ at day 11; see Figure~\ref{infProf}.
 
-\begin{figure}[!t]
+\begin{figure}[!p]
 %% begin.rcode infProf
 % par(mar=c(4,4,0,0)+0.1)
 % barplot(c("0"=0, infectivity) * 100, xlab = "infection age", ylab = "infectivity profile in %")
@@ -440,7 +440,7 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 % )
 %% end.rcode
 
-\begin{figure}[!bth]
+\begin{figure}[!p]
 %% begin.rcode simPlotInfect
 % par(mar=c(4,4,0,0)+0.1)
 % barplot(c("0" = 0, sim.infectivity[1:30]) * 100, xlab = "infection age", ylab = "infectivity profile in %")
@@ -469,7 +469,7 @@ In addition, we assume that countermeasures have been imposed at time $\rinline{
 Figure~\ref{simPlotSEIR} shows one simulation run.
 The resulting estimates $\hat R(t)$ and pointwise \rinline{100 * (1-alpha)}\%-confidence intervals ($\alpha = \rinline{100 * alpha}\%$ as usual) can be compared with the true reproduction rate $R(t)$ in Figure~\ref{simPlotSingle}.
 
-\begin{figure}[!bth]
+\begin{figure}[!p]
 %% begin.rcode simPlotSEIR
 % # proportion of susceptibles
 % prop.S <- sims["S",,] / n_people
@@ -490,11 +490,12 @@ The resulting estimates $\hat R(t)$ and pointwise \rinline{100 * (1-alpha)}\%-co
 \caption{One simulation of the SEIR model; black solid line: newly infected, purple solid line: newly infectious; dashed blue line: proportion of susceptibles; vertical red dotted lines: intervention times.}\label{simPlotSEIR}
 \end{figure}
 
-\begin{figure}[!tbh]
+\begin{figure}[!p]
 %% begin.rcode simPlotSingle
 % # true R
 % R <- rep(c(R0, R1, R2), diff(c(0, interv1, interv2, n_steps))) * prop.S[,1]
 % 
+% par(mar=c(4,4,0,4)+0.1)
 % with(sim.est[[1]], {
 %     plot(1:n_steps, repronum, type = "l", log = "y", lwd = 2,
 %         ylim = c(0.5, 5),
@@ -513,20 +514,59 @@ The resulting estimates $\hat R(t)$ and pointwise \rinline{100 * (1-alpha)}\%-co
 The simulation has been repeated \rinline{n_sim} times, and for each time point the proportion of confidence intervals containing the true reproduction number has been determined, see Figure~\ref{simCover}.
 They appear not quite to have the desired nominal coverage but given that they are only asymptotic confidence intervals, and modelling errors are typically much larger they appear acceptable in practice.
 
-\begin{figure}[!tbh]
+\begin{figure}[!p]
 %% begin.rcode simCover
 % coverage <- sapply(1:n_sim, function(i) {
 %     se <- sim.est[[i]]
 %     true.R <- rep(c(R0, R1, R2), diff(c(0, interv1, interv2, n_steps))) * prop.S[,i]
 %     se$ci.lower <= true.R & se$ci.upper >= true.R
 % })
-% plot(rowMeans(coverage) * 100, type = "l", xlab = "day", ylab = "coverage probability",
-%     main = "Coverage probability in %", ylim = 0:1, lwd = 1)
-% abline(h = 1-alpha, col = "blue", lty = 2)
+% par(mar=c(4,4,0,4)+0.1)
+% plot(rowMeans(coverage) * 100, type = "l", xlab = "day", ylab = "coverage probability in %", 
+%     ylim = c(0,100), lwd = 1)
+% abline(h = (1-alpha) * 100, col = "blue", lty = 2)
+% abline(h = c(0,100), col = "grey80", lty = 1)
 % abline(v = c(interv1, interv2) + 0.5, col = "red", lty = 3)
 %% end.rcode
 \caption{Estimated coverage probability based on \rinline{n_sim} simulations (black solid line); horizontal blue dahed line: nominal coverage (\rinline{100 * (1-alpha)}\%); vertical red dotted lines: intervention times.}\label{simCover}
 \end{figure}
+
+These simulations demonstrate how well the estimator is able to detect changes in the reproduction number.
+From a practical viewpoint, this is an overly optimistic result. 
+In fact, Equation~\eqref{condE} and consequently the estimator $\hat R(t)$ in Equation~\eqref{estim} are based on the number of newly infected cases.
+But \term{infection dates} are rarely known.
+Instead, cases are reported when they are tested with a positive test result.
+In our simple simulation, one should therefore consider the \term{newly infectious cases} at day $t$ as input data $I(t)$ for the estimator.
+Note that their increase lags behind the one of the \term{newly infected cases}, i.e. the \term{newly latent cases}, by the incubation time, see Figure~\ref{simPlotSEIR} where they lag behind by about $1$ day, the mode of the incubation time distribution.
+
+\begin{figure}[!p]
+%% begin.rcode simPlotSingleInfectious
+% sim.est.infectious <- apply(new.infectious, 2, repronum,
+%     profile = sim.infectivity,
+%     delay = 1,
+%     conf.level = 1-alpha,
+%     pad.zeros = TRUE
+% )
+% shift <- 1
+% 
+% par(mar=c(4,4,0,4)+0.1)
+% with(sim.est.infectious[[1]], {
+%     plot(1:n_steps, repronum, type = "l", log = "y", lwd = 2,
+%         ylim = c(0.5, 5),
+%         xlab = "day", ylab = "R(t)")
+%     abline(h = 1, col = "red")
+%     abline(h = c(R0, R1, R2), col = "red", lty = 3)
+%     abline(v = c(interv1, interv2) + 0.5, col = "red", lty = 3)
+%     lines(1:n_steps, ci.lower, lty = 2)
+%     lines(1:n_steps, ci.upper, lty = 2)
+%     lines(1:n_steps, R, col = "blue", lty = 1, lwd = 2)
+% })
+%% end.rcode
+\caption{Estimator based on the newly infectious of one simulation of the SEIR model shifted by \rinline{shift} day; black solid line: $\hat R(t)$; black dashed lines: pointwise \rinline{100 * (1-alpha)}\%-confidence intervals; blue solid line: $R(t)$; vertical red dotted lines: intervention times; horizontal red lines: corresponding reproduction numbers without decrease in susceptibles taken into account. This is to be compared with Figure~\ref{simPlotSingle} where the estimator is based on the newly infected cases.}\label{simPlotSingleInfectious}
+\end{figure}
+
+We use a na\"ive approach to deal with this \term{reporting delay}: we shift the estimator back by \rinline{shift} day.
+The result is shown in Figure~\ref{simPlotSingleInfectious} where the jump in $R(t)$ leads only to a rapid change of $\hat R(t)$, approaching the true value $R(t)$ exponentially fast, though.
 
 
 \section{Application to real data}
