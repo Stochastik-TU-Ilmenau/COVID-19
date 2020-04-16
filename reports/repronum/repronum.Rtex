@@ -761,7 +761,7 @@ Once case numbers stabilise, this effect obviously vanishes.
 As with the data source, the influence of the infectivity profile appears to be small enough not to matter qualitatively.
 
 
-\section{Discussion and Outlook}
+\section{Discussion}
 \label{DiscOut}
 
 The results on simulations in Section~\ref{ValidSim} demonstrate the validity of the estimator, and of the asymptotic confidence intervals we derived.
