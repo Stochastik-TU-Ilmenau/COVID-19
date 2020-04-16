@@ -25,8 +25,9 @@
 % #opts_knit$set(latex.options.color = list("pdftex")) # use latex color package with option for pdftex
 % opts_chunk$set(indent = "  ") # indent by 2 whitespaces
 % opts_chunk$set(echo = FALSE, results = "hide") # hide everything but plots by default
-% opts_chunk$set(fig.width=10, fig.height=6) # set default size of figures
+% opts_chunk$set(fig.width=10, fig.height=5.5) # set default size of figures
 % #opts_chunk$set(echo = TRUE, results = "markup") # show everything incl. plots by default
+% Sys.setlocale(,"en_GB.utf8")
 % }
 %% end.rcode
 
@@ -452,16 +453,16 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 To validate the estimator, we simulate a \term{stochastic SEIR} (a.k.a. Kermack-McKendrick) \term{model}.
 To be more precise, we consider a discrete-time Markov chain describing a population of $n = \rinline{n_people/1e6}$~million people with each individual being in one of four states: \term{susceptible}, i.e. not yet infected; \term{latent}, i.e. infected but not yet infectious; \term{infectious}; or \term{recovered} and thus immune.
 We start at time $0$ with $\rinline{n_latent}$ latent individuals, all others initially being susceptible.
-At each time step, a susceptible person becomes infected if it meets an infectious person which happens independently with probability $p_S$, a latent person becomes infectious with probability $p_I$, and an infectious person recovers with probability $p_R$; otherwise an individual remains in its state.
+At each time step, a susceptible person becomes infected if the virus is transmitted through contact with an infectious person; such contacts happen independently with probability $p_S$. A latent person becomes infectious with probability $p_I$, and an infectious person recovers with probability $p_R$; otherwise an individual remains in its state.
 
-This results in incubation times, i.e. times spent in the latent state, which are geometrically distributed with mean $\frac1{p_I}$; for this to be $\rinline{tI}$, we set $p_I = \frac1{\rinline{tI}}$.
-Similarly, the infectious period is geometrically distributed with mean $\frac1{p_R}$ which we would like to be $\rinline{tR}$, so we set $p_R = \frac1{\rinline{tR}}$.
+This results in incubation times, i.e. times spent in the latent state, which are geometrically distributed with mean $1/ {p_I}$; for this to be $\rinline{tI}$, we set $p_I = 1/ {\rinline{tI}}$.
+Similarly, the infectious period is geometrically distributed with mean $1/ {p_R}$ which we would like to be $\rinline{tR}$, so we set $p_R = 1/ {\rinline{tR}}$.
 The corresponding infectivity profile $w$ is then given by the convolution of these two geometric convolutions.
 It can be calculated analytically, see Appendix~\ref{InfProfSEIR} for details; the result is shown in Figure~\ref{simPlotInfect}.
 Note that $w(1) = w(0) = 0$ since it takes at least one day to become latent and another one to become infectious in this model.
 
-The basic reproduction rate is then given by $R_0 = \frac{n p_S}{p_R}$ since an infected person on average infects $n p_S$ individuals per day (if all were susceptible) for $\frac1{p_R}$ days on average.
-In order to simulate an epidemic with $R_0 = \rinline{R0}$, we set $p_S = \frac{R_0 p_R}n$ accordingly.
+The basic reproduction rate is then given by $R_0 = {n p_S}/{p_R}$ since an infected person on average infects $n p_S$ individuals per day (if all were susceptible) for $1/ {p_R}$ days on average.
+In order to simulate an epidemic with $R_0 = \rinline{R0}$, we set $p_S = {R_0 p_R}/n$ accordingly.
 
 Over time, the reproduction number changes naturally because more people recover and become immune: $R(t)$ is $R_0$ times the proportion of susceptible individuals at that time.
 In addition, we assume that countermeasures have been imposed at time $\rinline{interv1}$, resulting in $R(t)$ being $\rinline{R1}$ times the proportion of susceptibles afterwards, and that measures have been relaxed at time $\rinline{interv2}$, resulting in $R(t)$ being $\rinline{R2}$ times the proportion of susceptibles thereafter.
@@ -487,7 +488,7 @@ The resulting estimates $\hat R(t)$ and pointwise \rinline{100 * (1-alpha)}\%-co
 % axis(4)
 % mtext("proportion of susceptibles in %", 4, 3)
 %% end.rcode
-\caption{One simulation of the SEIR model; black solid line: newly infected, purple solid line: newly infectious; dashed blue line: proportion of susceptibles; vertical red dotted lines: intervention times.}\label{simPlotSEIR}
+\caption{One simulation of the SEIR model; black solid line (left axis): newly infected; purple solid line (left axis): newly infectious; dashed blue line (right axis): proportion of susceptibles; vertical red dotted lines: intervention times.}\label{simPlotSEIR}
 \end{figure}
 
 \begin{figure}[!p]
@@ -508,11 +509,11 @@ The resulting estimates $\hat R(t)$ and pointwise \rinline{100 * (1-alpha)}\%-co
 %     lines(1:n_steps, R, col = "blue", lty = 1, lwd = 2)
 % })
 %% end.rcode
-\caption{One simulation of the SEIR model; black solid line: $\hat R(t)$; black dashed lines: pointwise \rinline{100 * (1-alpha)}\%-confidence intervals; blue solid line: $R(t)$; vertical red dotted lines: intervention times; horizontal red lines: corresponding reproduction numbers without decrease in susceptibles taken into account.}\label{simPlotSingle}
+\caption{One simulation of the SEIR model; black solid line: $\hat R(t)$; black dashed lines: pointwise \rinline{100 * (1-alpha)}\%-confidence intervals; blue solid line: $R(t)$; vertical red dotted lines: intervention times; horizontal red dotted lines: corresponding reproduction numbers without decrease in susceptibles taken into account.}\label{simPlotSingle}
 \end{figure}
 
 The simulation has been repeated \rinline{n_sim} times, and for each time point the proportion of confidence intervals containing the true reproduction number has been determined, see Figure~\ref{simCover}.
-They appear not quite to have the desired nominal coverage but given that they are only asymptotic confidence intervals, and modelling errors are typically much larger they appear acceptable in practice.
+They appear not quite to have the desired nominal coverage but given that they are only asymptotic confidence intervals, and modelling errors are typically much larger, we consider them acceptable in practice.
 
 \begin{figure}[!p]
 %% begin.rcode simCover
@@ -565,24 +566,101 @@ Note that their increase lags behind the one of the \term{newly infected cases},
 \caption{Estimator based on the newly infectious of one simulation of the SEIR model shifted by \rinline{shift} day; black solid line: $\hat R(t)$; black dashed lines: pointwise \rinline{100 * (1-alpha)}\%-confidence intervals; blue solid line: $R(t)$; vertical red dotted lines: intervention times; horizontal red lines: corresponding reproduction numbers without decrease in susceptibles taken into account. This is to be compared with Figure~\ref{simPlotSingle} where the estimator is based on the newly infected cases.}\label{simPlotSingleInfectious}
 \end{figure}
 
-We use a na\"ive approach to deal with this \term{reporting delay}: we shift the estimator back by \rinline{shift} day.
+We use a na\"ive approach to deal with this \term{reporting delay}: we shift the estimator back by the observed lag, i.e. by \rinline{shift}~day.
 The result is shown in Figure~\ref{simPlotSingleInfectious} where the jump in $R(t)$ leads only to a rapid change of $\hat R(t)$, approaching the true value $R(t)$ exponentially fast, though.
+For real data, the reporting delay is even larger, since symptomatic cases are usually not reported immediately. This will be taken into account in the following section.
 
 
 \section{Application to real data}
 \label{ApplReal}
 
-%% begin.rcode real
+\begin{figure}[!p]
+%% begin.rcode real, results="markup"
 % report.delay <- 7
+% cleaned <- read.csv("../../data/clean/data_ger_bundl.csv", colClasses=c(date="Date"))
+% 
+% laender <- reshape(cleaned[,c("date", "day", "reg0.id", "new.cases")], v.names="new.cases", idvar="date", timevar="reg0.id", direction="wide")
+% laender <- laender[order(laender$date),]
+% maxday <- max(laender$day)
+% laender <- laender[laender$day <= maxday - 3,]
+% mindate <- as.Date("2020-03-01")
+% maxdate <- max(laender$date)
+% 
+% bund <-cbind(laender[,1:2], new.cases=rowSums(laender[,-(1:2)]))
+% 
+% par(mar=c(4,4,0,4)+0.1)
+% with(bund, {
+%     plot(date, new.cases, type="h", xlab="reporting date", ylab="newly reported cases", xlim=c(mindate, maxdate), axes=F)
+%     box()
+%     axis(1, at=laender$date[laender$day %% 7 == 6], label=format(laender$date[laender$day %% 7 == 6], "%d/%m/%y"))
+%     axis(2)
+% })
+% 
+% 
+% bund.est <- cbind(bund, repronum(
+%     new.cases = bund$new.cases,
+%     profile = infectivity,
+%     delay = report.delay,
+%     conf.level = 1-alpha
+% ))
 %% end.rcode
+\caption{Newly reported cases for Germany over time, based on data from the \citet{rki}.}\label{bund}
 
-- the **reporting delay** is chosen as the median incubation period plus 2, i.e. \rinline{report.delay} days.
+\end{figure}
+
+\begin{figure}[!p]
+%% begin.rcode bundEst
+% par(mar=c(4,4,0,4)+0.1)
+% with(bund.est[bund.est$date >= mindate & !is.na(bund.est$repronum),], {
+%     plot(date, repronum, type = "l", log = "y", lwd = 2, xlim=c(mindate, maxdate),
+%         xlab = "date", ylab = "estimated R(t)", axes=F)
+%     box()
+%     axis(1, at=laender$date[laender$day %% 7 == 6], label=format(laender$date[laender$day %% 7 == 6], "%d/%m/%y"))
+%     axis(2, at=1:9)
+%     axis(2, at=1:9 / 10)
+%     abline(h = 1, col = "red")
+%     abline(v = as.Date(c("2020-03-13", "2020-03-25")), col = "red", lty = 3)
+%     lines(date, ci.lower, lty = 2)
+%     lines(date, ci.upper, lty = 2)
+% })
+%% end.rcode
+\caption{Estimated reproduction numbers for Germany over time (solid line) with pointwise \rinline{(1-alpha)*100}\%-confidence intervals (dashed lines); vertical red dashed lines indicate the time period over which countermeasures have been implemented, cf. Table~\ref{npi}.}\label{bundEst}
+\end{figure}
+
+As an example, we consider data for Germany and its federal states (Bundesländer) provided by the \citet{rki}, see Figure~\ref{bund} for the total daily reported cases.
+Each case in this dataset is labelled with a \term{reporting date}, i.e. the day when the local health authority (Gesundheitsamt) has been notified about the case.
+Of course, this is not the day of symptom onset, let alone the day of infection which is need for the estimator in Equation~\eqref{estim}.
+We therefore set a \term{reporting delay} by which we backdate the cases.
+It is pragmatically chosen as the 5~days of incubation time (cf. Section~\ref{SpecCOVID}) plus 2~more days for testing etc., i.e. the reporting delay is set to \rinline{report.delay}~days.
+
+Since cases are reported to local health authorities, then collected at the level of states who in turn report them to the federal Robert Koch-Institut, they appear in the dataset a few days later, although with the date of reporting to the local health authority.
+Therefore, we exclude data from the last three days.
+
+\begin{table}[!t]
+\begin{center}
+\begin{tabular}{l|l}
+13--18/03/2020 (mostly 16/03/2020) & school closures \\
+14--22/03/2020 (mostly 16--22/03/2020 & closure of institutions, restaurants etc. \\
+20--25/03/2020 (mostly 22/03/2020) & contact restrictions
+\end{tabular}
+\end{center}
+\caption{Summary of starting dates for non-pharmaceutical interventions introduced by federal states in Germany.}\label{npi}
+\end{table}
+
+Based on the backdated data, we estimated the reproduction numbers for Germany over time, see Figure~\ref{bundEst}.
+Note that there are no estimates for the last \rinline{report.delay}~days for which data are shown in Figure~\ref{bund} due to the reporting delay.
+
+Starting with Bremen on 13/03/2020, more and more restrictive non-pharmaceutical countermeasures have been adopted by the federal states; see Table~\ref{npi} for a short overview.
+Their effect on the reproduction number is clearly visible in Figure~\ref{bund}, resulting in a reproduction number of less than 1 with all measures in place.
+
+The strong weekly pattern in the estimates is due to the fact that less cases are reported around weekends, cf. Figure~\ref{bund} where Mondays are marked on the horizontal axis.
+We do not compute an average over a sliding window of seven days so the viewer immediately recognizes the size of such artefacts, warning her to be overly confident in the results.
+In fact, these artefacts are much larger than the statistical uncertainty due to the stochastic nature of the epidemic which is reflected in the confidence intervals.
 
 
 \section{Sensitivity analysis}
 \label{SensAnal}
 
-%TODO \section{Comparison with other estimators}
 
 \section{Discussion and Outlook}
 \label{DiscOut}
