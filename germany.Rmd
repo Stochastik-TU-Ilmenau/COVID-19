@@ -3,6 +3,8 @@ title: 'Monitoring der Ausbreitung von COVID-19 durch Schätzen der Reproduktion
 output:
   html_document:
     theme: lumen
+    self_contained: false
+    lib_dir: html_libraries
 ---
 
 Erstellt von

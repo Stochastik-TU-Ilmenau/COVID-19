@@ -3,6 +3,8 @@ title: 'Monitoring the spread of COVID-19 by estimating reproduction numbers ove
 output:
   html_document:
     theme: lumen
+    self_contained: false
+    lib_dir: html_libraries
 ---
 
 Created by
