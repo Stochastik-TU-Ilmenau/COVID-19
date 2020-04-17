@@ -398,7 +398,7 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 % pc2 <- R2 * pR 
 % 
 % # number of paths to simulate
-% n_sim <- as.integer(1e4)
+% n_sim <- as.integer(1e2)
 % 
 % # time steps
 % n_steps <- as.integer(120)
@@ -461,7 +461,7 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 
 
 To validate the estimator, we simulate a \term{stochastic SEIR} (a.k.a. Kermack-McKendrick) \term{model}.
-To be more precise, we consider a discrete-time Markov chain describing a population of $n = \rinline{n_people/1e6}$~million people with each individual being in one of four states: \term{susceptible}, i.e. not yet infected; \term{exposed}, better called \term{latent}, i.e. infected but not yet infectious; \term{infectious}; or \term{recovered} and thus immune.
+To be more precise, we consider a discrete-time Markov chain describing a population of $n = \rinline{n_people/1e6}$~million people with each individual being in one of four states: \term{susceptible}, i.e. not yet infected; \term{exposed}, more aptly called \term{latent}, i.e. infected but not yet infectious; \term{infectious}; or \term{recovered} and thus immune.
 We start at time $0$ with $\rinline{n_latent}$ latent individuals, all others initially being susceptible.
 At each time step, a susceptible person becomes infected if the virus is transmitted through contact with an infectious person; such contacts happen independently with probability $p_E$. A latent person becomes infectious with probability $p_I$, and an infectious person recovers with probability $p_R$; otherwise an individual remains in its state.
 
@@ -576,9 +576,9 @@ Note that their increase lags behind the one of the \term{newly infected cases},
 \caption{Estimator based on the newly infectious of one simulation of the SEIR model shifted by \rinline{shift} day; black solid line: $\hat R(t)$; black dashed lines: pointwise \rinline{100 * (1-alpha)}\%-confidence intervals; blue solid line: $R(t)$; vertical red dotted lines: intervention times; horizontal red lines: corresponding reproduction numbers without decrease in susceptibles taken into account. This is to be compared with Figure~\ref{simPlotSingle} where the estimator is based on the newly infected cases.}\label{simPlotSingleInfectious}
 \end{figure}
 
-We use a na\"ive approach to deal with this \term{reporting delay}: we shift the estimator back by the observed lag, i.e. by \rinline{shift}~day.
+We use a na\"ive approach to deal with this which we call \term{infection-to-observation period}: we shift the estimator back by the observed lag, i.e. by \rinline{shift}~day.
 The result is shown in Figure~\ref{simPlotSingleInfectious} where the jump in $R(t)$ leads only to a rapid change of $\hat R(t)$, approaching the true value $R(t)$ exponentially fast, though.
-For real data, the reporting delay is even larger, since symptomatic cases are usually not reported immediately. This will be taken into account in the following section.
+For real data, the infection-to-observation period is even larger, since symptomatic cases are usually not reported immediately. This will be taken into account in the following section.
 
 
 \section{Application to real data}
@@ -639,8 +639,8 @@ For real data, the reporting delay is even larger, since symptomatic cases are u
 As an example, we consider data for Germany and its federal states (Bundesländer) provided by the \citet{rki}, see Figure~\ref{bund} for the total daily reported cases.
 Each case in this dataset is labelled with a \term{reporting date}, i.e. the day when the local health authority (Gesundheitsamt) has been notified about the case.
 Of course, this is not the day of symptom onset, let alone the day of infection which is needed for the estimator in Equation~\eqref{estim}.
-We therefore set a \term{reporting delay} by which we backdate the cases.
-It is pragmatically chosen as 5~days of incubation time (cf. Section~\ref{SpecCOVID}) plus 2~more days for testing etc., i.e. the reporting delay is set to \rinline{report.delay}~days.
+We therefore set an \term{infection-to-observation period} by which we backdate the cases.
+It is pragmatically chosen as 5~days of incubation time (cf. Section~\ref{SpecCOVID}) plus 2~more days \term{reporting delay} for testing etc., i.e. the infection-to-observation period is set to \rinline{report.delay}~days.
 
 Since cases are reported to local health authorities, then collected at the level of states who in turn report them to the federal Robert Koch-Institut, they appear in the dataset a few days later, although with the date of reporting to the local health authority.
 Therefore, we exclude data from yesterday and the two days before.
@@ -658,7 +658,7 @@ Therefore, we exclude data from yesterday and the two days before.
 \end{table}
 
 Based on the backdated data and the infectivity profile from Section~\ref{SpecCOVID} (see Figure~\ref{infProf}), we estimated the reproduction numbers for Germany over time, see Figure~\ref{bundEst}.
-Note that there are no estimates for the last \rinline{report.delay}~days for which new cases are shown in Figure~\ref{bund} due to the reporting delay.
+Note that there are no estimates for the last \rinline{report.delay}~days for which new cases are shown in Figure~\ref{bund} due to the infection-to-observation period.
 
 Starting with Bremen on 13/03/2020, more and more restrictive non-pharmaceutical countermeasures have been adopted by the federal states; see Table~\ref{npi} for a short overview.
 Their effect on the reproduction number is clearly visible in Figure~\ref{bund}, resulting in a reproduction number of less than 1 with all measures in place.
