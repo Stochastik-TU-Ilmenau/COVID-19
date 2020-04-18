@@ -100,7 +100,7 @@ Neben den hier dargestellten Ergebnissen für Deutschland und seine Bundeslände
 - Zu beachten ist weiterhin, dass das Meldedatum der Fälle aufgrund der Inkubationszeit (ca. 5 Tage [(WHO 2020)](#ref3)) und der Zeit für die Durchführung der Tests sowie der Meldung an die Behörden wesentlich später liegt als das tatsächliche Infektionsdatum. Der Einfachheit halber wird hier von einer Verzögerung von 7 Tagen ausgegangen. Daher wird auch die Schätzung der Reproduktionszahl **um eine Woche zeitversetzt** zu den gemeldeten Fällen angezeigt.
 - Aufgrund der Meldekette vom Gesundheitsamt des Landkreises über die zuständige Landesbehörde an das Robert Koch-Institut werden noch Daten nachgetragen - und zwar für die letzten 3 Tage in nicht zu vernachlässigendem Umfang. Deshalb sind die jeweils **letzten 3 Werte noch nicht vollständig** und werden entsprechend blasser dargestellt.
 - In einer Population, in der keine Gegenmaßnahmen unternommen werden, wird die sogenannte **Basisreproduktionszahl** *R<sub>0</sub>* auf einen Wert zwischen 2,4 und 4,1 geschätzt [(Read et al. 2020)](#ref4). Schätzungen mit höheren Werten könnten durch eine beträchtliche Anzahl von von außen **eingeschleppten Fällen** erklärt werden.
--  **Details** findet man im zugehörigen Bericht<!--[Bericht](reports/repronum/repronum.pdf)--> (demnächst auf Englisch verfügbar); der **Code** ist [hier](https://github.com/Stochastik-TU-Ilmenau/COVID-19/blob/gh-pages/estimator.r) verfügbar.
+-  **Details** findet man im zugehörigen [Bericht](reports/repronum/repronum.pdf); der **Code** ist [hier](https://github.com/Stochastik-TU-Ilmenau/COVID-19/blob/gh-pages/estimator.r) verfügbar.
 
 ### Referenzen
 
