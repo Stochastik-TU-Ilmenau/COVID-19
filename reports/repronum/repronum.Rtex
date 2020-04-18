@@ -164,7 +164,7 @@
     $^2$ School of Public Health, Bielefeld University\\
     {\fontsize{10}{12}\selectfont\texttt{\{anne.boehle,alexander.kraemer\}@uni-bielefeld.de}}
 }
-\date{\rinline{format(Sys.time(), '%d/%m/%y -- %H:%M', tz = "GMT")} GMT}
+\date{\rinline{format(Sys.time(), '%d/%m/%y', tz = "GMT")}}
 
 \begin{document}
 
@@ -398,7 +398,7 @@ In Section~\ref{SensAnal} we discuss the effect this choice has on the analysis.
 % pc2 <- R2 * pR 
 % 
 % # number of paths to simulate
-% n_sim <- as.integer(1e2)
+% n_sim <- as.integer(1e5)
 % 
 % # time steps
 % n_steps <- as.integer(120)
@@ -522,7 +522,7 @@ The resulting estimates $\hat R(t)$ and pointwise \rinline{100 * (1-alpha)}\%-co
 \caption{One simulation of the SEIR model; black solid line: $\hat R(t)$; black dashed lines: pointwise \rinline{100 * (1-alpha)}\%-confidence intervals; blue solid line: $R(t)$; vertical red dotted lines: intervention times; horizontal red dotted lines: corresponding reproduction numbers without decrease in susceptibles taken into account.}\label{simPlotSingle}
 \end{figure}
 
-The simulation has been repeated \rinline{n_sim} times, and for each time point the proportion of confidence intervals containing the true reproduction number has been determined, see Figure~\ref{simCover}.
+The simulation has been repeated $10^{\rinline{log10(n_sim)}}$ times, and for each time point the proportion of confidence intervals containing the true reproduction number has been determined, see Figure~\ref{simCover}.
 They appear not quite to have the desired nominal coverage but given that they are only asymptotic confidence intervals, and modelling errors are typically much larger, we consider them acceptable in practice.
 
 \begin{figure}[!p]
@@ -539,7 +539,7 @@ They appear not quite to have the desired nominal coverage but given that they a
 % abline(h = c(0,100), col = "grey80", lty = 1)
 % abline(v = c(interv1, interv2) + 0.5, col = "red", lty = 3, lwd = 2)
 %% end.rcode
-\caption{Estimated coverage probability based on \rinline{n_sim} simulations (black solid line); horizontal blue dahed line: nominal coverage (\rinline{100 * (1-alpha)}\%); vertical red dotted lines: intervention times.}\label{simCover}
+\caption{Estimated coverage probability based on $10^{\rinline{log10(n_sim)}}$ simulations (black solid line); horizontal blue dahed line: nominal coverage (\rinline{100 * (1-alpha)}\%); vertical red dotted lines: intervention times.}\label{simCover}
 \end{figure}
 
 These simulations demonstrate how well the estimator is able to detect changes in the reproduction number.
@@ -846,7 +846,7 @@ Note that (approximate) coverage is always guaranteed conditionally on the past,
 \label{InfProfSEIR}
 
 Both latent period and infectious period are geometrically distributed with parameters $p_I$ and $p_R$, respectively.
-We need to compute the convolution (summing over time $s$ of getting infectious).
+We essentially need to compute the convolution (summing over time $s$ of getting infectious).
 For $\tau > 1$ and assuming $p_I > p_R$ (the other cases are similar), we obtain
 \begin{align}
 w(\tau) &= \sum_{s=1}^{\tau - 1} p_I (1 - p_I)^{s-1} (1-p_R)^{\tau-1-s}
