@@ -12,6 +12,7 @@
 \definecolor{citecolor}{rgb}{0,0,0.5}
 \usepackage[pdfpagemode=UseOutlines,urlcolor=urlcolor,linkcolor=linkcolor,citecolor=citecolor,colorlinks=true]{hyperref}
 
+\usepackage[utf8]{inputenc}
 \usepackage[british]{babel}
 \usepackage{natbib}
 \usepackage{enumerate}
@@ -180,7 +181,7 @@
 \begin{abstract}
 To control the current outbreak of the Coronavirus Disease 2019, constant monitoring of the epidemic is required since, as of today, no vaccines or antiviral drugs against it are known.
 We provide daily updated estimates of the reproduction number over time at \url{https://stochastik-tu-ilmenau.github.io/COVID-19/}.
-In this document, we describe the estimator, developed in \citep{fraser2007}, we are using, and we give details on its implementation.
+In this document, we describe the estimator we are using which was developed in \citep{fraser2007}, derive its asymptotic properties, and we give details on its implementation.
 Furthermore, we validate the estimator on simulated data, demonstrate that estimates on real data lead to plausible results, and perform a sensitivity analysis.
 Finally, we discuss why the estimates obtained need to be interpreted with care.
 \end{abstract}
