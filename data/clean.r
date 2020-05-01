@@ -136,18 +136,30 @@ write.csv(ger_tot, file='./clean/data_ger_tot.csv', row.names=FALSE)
 ## 3) # create lookup table for world ==========================================
 lookup_world <- read.csv(file.path('./johns_hopkins/csse_covid_19_data/',
                                    'UID_ISO_FIPS_LookUp_Table.csv'))
-lookup_world <- lookup_world[1:173, ]
+# only keep real countries no subregions:
+lookup_world <- lookup_world[lookup_world$Province_State=='',]
+#
 lookup_world <- unique(subset(lookup_world,
                               select = c('iso3', 'Country_Region')))
-missing <- data.frame(iso3=c('CAN', 'AUS', 'CHN', 'USA'),
-                      Country_Region=c('Canada', 'Australia', 'China', 'US'))
-lookup_world <- merge(lookup_world, missing, all=TRUE)
+# remove ships:
+lookup_world <- lookup_world[lookup_world$iso3!='',]
+
+# old:
+#missing <- data.frame(iso3=c('CAN', 'AUS', 'CHN', 'USA'),
+#                      Country_Region=c('Canada', 'Australia', 'China', 'US'))
+#lookup_world <- merge(lookup_world, missing, all=TRUE)
+
 # rename countries:
-levels(lookup_world$Country_Region)[levels(lookup_world$Country_Region)
-                                    == 'Taiwan*'] <- 'Taiwan'
-levels(lookup_world$Country_Region)[levels(lookup_world$Country_Region)
-                                    == 'Korea, South'] <- 'South Korea'
-lookup_world <- lookup_world[-c(1,2),]
+lookup_world$Country_Region[lookup_world$Country_Region=="Taiwan*"] <- "Taiwan"
+lookup_world$Country_Region[lookup_world$Country_Region=="Korea, South"] <- "South Korea"
+
+# old:
+#levels(lookup_world$Country_Region)[levels(lookup_world$Country_Region)
+#                                    == 'Taiwan*'] <- 'Taiwan'
+#levels(lookup_world$Country_Region)[levels(lookup_world$Country_Region)
+#                                    == 'Korea, South'] <- 'South Korea'
+#lookup_world <- lookup_world[-c(1,2),]
+
 names(lookup_world) <- c('reg0.id', 'reg0.name')
 write.csv(lookup_world, file='./clean/lookup_world_jh.csv', row.names=FALSE)
 ## =============================================================================
