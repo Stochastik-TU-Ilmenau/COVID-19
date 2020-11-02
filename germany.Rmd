@@ -49,36 +49,37 @@ on generating tabs in rmarkdown automatically
 
 # add all of Germany to Bundesland data
 ger_tot$reg0.name <- "Deutschland"
-germany <- merge(ger_tot, germany, all=TRUE)
+germany <- merge(ger_tot, germany, all = TRUE)
 
 # tabs for Bundeslaender (and all Germany) sorted alphabetically
 regions <- sort(unique(germany$reg0.name))
 regions <- c("Deutschland", regions[!(regions == "Deutschland")])
 
-plots <- lapply(regions, function(country_name) {
-    country <- germany %>%
-        filter(reg0.name == country_name) %>%
-        mutate(date = ymd(date))
+plots <- lapply(regions, function(region) {
+    fname <- paste0(
+        "data/estimates/Germany_",
+        if(region == "Deutschland") "" else paste0(region, "_"),
+        "RKI_R.csv"
+    )
+    estimates <- read.csv(fname)
+    estimates$date <- as.Date(estimates$date)
 
-    estimates <- cbind(country, repronum(
-            new.cases = country$new.cases,
-            profile = infectivity,
-            window = width,
-            delay = report.delay,
-            conf.level = 1 - alpha,
-            pad.zeros = TRUE
-        ))
-
-    plot_repronum(estimates, country_name, language = "de", unreliable = 2)
+    plot_repronum(estimates, region, language = "de", unreliable = 2)
 })
 
 out <- lapply(seq_along(plots), function(i) {
-  a1 <- knitr::knit_expand(text = sprintf("### %s\n", regions[i])) # tab header, auto extracts names of `hcs`
-  a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE, message = FALSE}") # start r chunk
-  a3 <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i)) # extract graphs by "writing" out `hcs[[1]]`, `hcs[[2]]` etc. to be rendered later
-  a4 <- knitr::knit_expand(text = "\n```\n") # end r chunk
+    tab_header <- knitr::knit_expand(text = sprintf("### %s\n", regions[i])) 
+    chunk_start <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE, message = FALSE}") 
 
-  paste(a1, a2, a3, a4, collapse = '\n') # collapse together all lines with newline separator
+    plot_content <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i)) 
+
+    chunk_end <- knitr::knit_expand(text = "\n```\n") 
+
+    fname <- if (i == 1) "Germany_RKI_R.csv" else paste0("Germany_", regions[i], "_RKI_R.csv")
+    download_text <- paste0("Die Daten zu dieser Grafik können Sie [hier](data/estimates/", fname, ") herunterladen.\n")
+
+
+    paste(tab_header, chunk_start, plot_content, chunk_end, download_text, collapse = '\n') 
 })
 ```
 

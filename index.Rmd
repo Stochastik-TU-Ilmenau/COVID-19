@@ -56,38 +56,26 @@ df <- df[rev(order(df$tot.cases)),]
 countries <- unique(df$reg0.name[1:(numcountries + 1)])
 
 plots <- lapply(countries, function(country_name) {
-    country <- johns_hopkins %>%
-        filter(reg0.name == country_name) %>%
-        mutate(date = ymd(date))
-
-    estimates <- cbind(country, repronum(
-            new.cases = country$new.cases,
-            profile = infectivity,
-            window = width,
-            delay = report.delay,
-            conf.level = 1 - alpha,
-            pad.zeros = TRUE
-        ))
+    fname <- paste0("data/estimates/", country_name, "_JHU_R.csv")
+    estimates <- read.csv(fname)
+    estimates$date <- as.Date(estimates$date)
 
     plot_repronum(estimates, country_name, language = "en")
 })
 
 out <- lapply(seq_along(plots), function(i) {
-  # tab header, auto extracts names of `hcs`
-  a1 <- knitr::knit_expand(text = sprintf("### %s\n", countries[i]))
 
-  # start r chunk
-  a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE}")
+  tab_header <- knitr::knit_expand(text = sprintf("### %s\n", countries[i]))
+  chunk_start <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE}")
 
-  # extract graphs by "writing" out `hcs[[1]]`,
-  # `hcs[[2]]` etc. to be rendered later
-  a3 <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i))
+  plot_content <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i))
 
-  # end r chunk
-  a4 <- knitr::knit_expand(text = "\n```\n")
+  chunk_end <- knitr::knit_expand(text = "\n```\n")
 
-  # collapse together all lines with newline separator
-  paste(a1, a2, a3, a4, collapse = '\n')
+  fname <- paste0(countries[i], "_JHU_R.csv")
+  download_text <- paste0("You can download the data displayed above [here](data/estimates/", fname, ").\n")
+
+  paste(tab_header, chunk_start, plot_content, chunk_end, download_text, collapse = '\n')
 })
 
 ```

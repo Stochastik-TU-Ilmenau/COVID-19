@@ -276,3 +276,64 @@ world_tot <- aggregate(cbind(tot.cases, tot.dead, tot.recovered,
                      ~ day + yday + date, world_tot, sum)
 write.csv(world_tot, file='./clean/data_world_tot.csv', row.names=FALSE)
 ## =============================================================================
+
+## 3) estimate reproduction numbers
+source("../estimator.r")
+
+### World total (JHU)
+R_world <- repronum(
+    world_tot$new.cases,
+    profile = infectivity,
+    window = width,
+    delay = report.delay,
+    conf.level = 1 - alpha,
+    pad.zeros = TRUE
+)
+
+fname <- paste0("estimates/World_JHU_R.csv")
+write.csv(cbind(world_tot[,c("date", "new.cases", "reg0.name")], R_world), fname, row.names = FALSE)
+
+### countries (JHU)
+for (country in unique(world$reg0.name)) {
+    cases <- world[world$reg0.name == country,]
+    R <- repronum(
+        cases$new.cases,
+        profile = infectivity,
+        window = width,
+        delay = report.delay,
+        conf.level = 1 - alpha,
+        pad.zeros = TRUE
+    )
+
+    fname <- paste0("estimates/", country, "_JHU_R.csv")
+    write.csv(cbind(cases, R), fname, row.names = FALSE)
+}
+
+### Germany (Total, RKI)
+R_ger <- repronum(
+    ger_tot$new.cases,
+    profile = infectivity,
+    window = width,
+    delay = report.delay,
+    conf.level = 1 - alpha,
+    pad.zeros = TRUE
+)
+
+fname <- paste0("estimates/Germany_RKI_R.csv")
+write.csv(cbind(ger_tot[,c("date", "new.cases")], R_ger), fname, row.names = FALSE)
+
+### Germany (States, RKI)
+for (state in unique(ger_b$reg0.name)) {
+    cases <- ger_b[ger_b$reg0.name == state,]
+    R <- repronum(
+        cases$new.cases,
+        profile = infectivity,
+        window = width,
+        delay = report.delay,
+        conf.level = 1 - alpha,
+        pad.zeros = TRUE
+    )
+
+    fname <- paste0("estimates/Germany_", state, "_RKI_R.csv")
+    write.csv(cbind(cases, R), fname, row.names = FALSE)
+}
