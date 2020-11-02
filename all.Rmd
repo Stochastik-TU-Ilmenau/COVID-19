@@ -46,18 +46,9 @@ num_days <- aggregate(tot.cases ~ reg0.name, df_num_days, length)
 countries <- unique(num_days$reg0.name[num_days$tot.cases > report.delay])
 
 plots <- lapply(countries, function(country_name) {
-    country <- johns_hopkins %>%
-        filter(reg0.name == country_name) %>%
-        mutate(date = ymd(date))
-
-    estimates <- cbind(country, repronum(
-            new.cases = country$new.cases,
-            profile = infectivity,
-            window = width,
-            delay = report.delay,
-            conf.level = 1 - alpha,
-            pad.zeros = TRUE
-        ))
+    fname <- paste0("data/estimates/", country_name, "_JHU_R.csv")
+    estimates <- read.csv(fname)
+    estimates$date <- as.Date(estimates$date)
 
     num.estimates <- sum(!is.na(estimates$repronum))
     if (num.estimates >= 3)  {
@@ -72,13 +63,17 @@ countries <- countries[!is.na(plots)]
 plots <- plots[!is.na(plots)]
 
 out <- lapply(seq_along(plots), function(i) {
+    tab_header <- knitr::knit_expand(text = sprintf("### %s\n", countries[i]))
+    chunk_start <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE}")
 
-  a1 <- knitr::knit_expand(text = sprintf("### %s\n", countries[i])) # tab header, auto extracts names of `hcs`
-  a2 <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE}") # start r chunk
-  a3 <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i)) # extract graphs by "writing" out `hcs[[1]]`, `hcs[[2]]` etc. to be rendered later
-  a4 <- knitr::knit_expand(text = "\n```\n") # end r chunk
+    plot_content <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i))
 
-  paste(a1, a2, a3, a4, collapse = '\n') # collapse together all lines with newline separator
+    chunk_end <- knitr::knit_expand(text = "\n```\n")
+
+    fname <- paste0(countries[i], "_JHU_R.csv")
+    download_text <- paste0("You can download the data displayed above [here](data/estimates/", fname, ").\n")
+
+    paste(tab_header, chunk_start, plot_content, chunk_end, download_text, collapse = '\n')
 })
 ```
 
