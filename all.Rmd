@@ -71,9 +71,13 @@ out <- lapply(seq_along(plots), function(i) {
     chunk_end <- knitr::knit_expand(text = "\n```\n")
 
     fname <- paste0(countries[i], "_JHU_R.csv")
-    download_text <- paste0("You can download the data displayed above [here](data/estimates/", fname, ").\n")
+    download_text <- paste0("You can download the data displayed above [here](data/estimates/", fname, ").")
+        
+    data_description <- "In this file <b>new.cases</b> is the amount of newly reported cases on that day.
+    <b>repronum</b> is the estimated reproduction number with (estimated) standard error <b>repronum.se</b> 
+    and 95% confidence interval ranging from <b>ci.lower</b> to <b>ci.upper</b>. \n"
 
-    paste(tab_header, chunk_start, plot_content, chunk_end, download_text, collapse = '\n')
+    paste(tab_header, chunk_start, plot_content, chunk_end, download_text, data_description, collapse = '\n')
 })
 ```
 

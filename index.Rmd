@@ -64,18 +64,25 @@ plots <- lapply(countries, function(country_name) {
 })
 
 out <- lapply(seq_along(plots), function(i) {
+    tab_header <- knitr::knit_expand(text = sprintf("### %s\n", countries[i]))
+    chunk_start <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE}")
 
-  tab_header <- knitr::knit_expand(text = sprintf("### %s\n", countries[i]))
-  chunk_start <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE}")
+    plot_content <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i))
 
-  plot_content <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i))
+    chunk_end <- knitr::knit_expand(text = "\n```\n")
 
-  chunk_end <- knitr::knit_expand(text = "\n```\n")
+    fname <- paste0(countries[i], "_JHU_R.csv")
+    download_text <- paste0("You can download the data displayed above [as a .csv file](data/estimates/", fname, ").\n")
+    data_description <- "This file contains the following columns:
+    <ul>
+        <li><b>date</b> the date,</li>
+        <li><b>new.cases</b> the number of newly reported cases on that day,</li>
+        <li><b>repronum</b> the estimated reproduction number on that day,</li>
+        <li><b>repronum.se</b> the (estimated) standard error of the estimate,</li>
+        <li><b>ci.lower</b> the lower limit of the associated 95% confidence interval and</li>
+        <li><b>ci.upper</b> the upper limit of the associated 95% confidence interval.</li>\n"
 
-  fname <- paste0(countries[i], "_JHU_R.csv")
-  download_text <- paste0("You can download the data displayed above [here](data/estimates/", fname, ").\n")
-
-  paste(tab_header, chunk_start, plot_content, chunk_end, download_text, collapse = '\n')
+    paste(tab_header, chunk_start, plot_content, chunk_end, download_text, data_description, collapse = '\n')
 })
 
 ```

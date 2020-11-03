@@ -78,8 +78,17 @@ out <- lapply(seq_along(plots), function(i) {
     fname <- if (i == 1) "Germany_RKI_R.csv" else paste0("Germany_", regions[i], "_RKI_R.csv")
     download_text <- paste0("Die Daten zu dieser Grafik können Sie [hier](data/estimates/", fname, ") herunterladen.\n")
 
+    data_description <- "Diese Datei enthält folgende Spalten:
+    <ul>
+        <li><b>date</b> das Datum</li>
+        <li><b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,</li>
+        <li><b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,</li>
+        <li><b>repronum.se</b> der (geschätzte) Standardfehler der Reproduktionszahl,</li>
+        <li><b>ci.lower</b> die untere Grenze des 95% Konfidenzintervals und</li>
+        <li><b>ci.upper</b> die obere Grenze des 95% Konfidentervals.</li>\n"
+    
 
-    paste(tab_header, chunk_start, plot_content, chunk_end, download_text, collapse = '\n') 
+    paste(tab_header, chunk_start, plot_content, chunk_end, download_text, data_description, collapse = '\n') 
 })
 ```
 
