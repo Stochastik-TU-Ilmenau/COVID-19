@@ -25,6 +25,7 @@ der
 ```{r libraries, echo = F, message = F, warning = F, results='hide'}
 library(lubridate, warn.conflicts = F)
 library(plotly, warn.conflicts = F)
+library(stringr, warn.conflicts = F)
 Sys.setlocale('LC_TIME', 'C')
 source("plot.r")
 source("estimator.r")
@@ -76,19 +77,26 @@ out <- lapply(seq_along(plots), function(i) {
     chunk_end <- knitr::knit_expand(text = "\n```\n") 
 
     fname <- if (i == 1) "Germany_RKI_R.csv" else paste0("Germany_", regions[i], "_RKI_R.csv")
-    download_text <- paste0("Die Daten zu dieser Grafik können Sie [hier](data/estimates/", fname, ") herunterladen.\n")
+    download_text <- "<details> 
+    <summary> Daten herunterladen (Datenstand ${format(Sys.time(), '%d.%m.%Y, %H:%M', tz = 'Europe/Berlin')}) </summary>
 
-    data_description <- "Diese Datei enthält folgende Spalten:
+    Die Daten zu dieser Grafik können Sie <a href='data/estimates/${fname}'>hier</a> herunterladen.
+
+    Diese Datei enthält folgende Spalten:
     <ul>
-        <li><b>date</b> das Datum</li>
+        <li><b>date</b> das Datum,</li>
         <li><b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,</li>
         <li><b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,</li>
         <li><b>repronum.se</b> der (geschätzte) Standardfehler der Reproduktionszahl,</li>
-        <li><b>ci.lower</b> die untere Grenze des 95% Konfidenzintervals und</li>
-        <li><b>ci.upper</b> die obere Grenze des 95% Konfidentervals.</li>\n"
-    
+        <li><b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und</li>
+        <li><b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.</li>
+    </ul>
+    </details>
+    \n"
 
-    paste(tab_header, chunk_start, plot_content, chunk_end, download_text, data_description, collapse = '\n') 
+    download_text <- str_interp(download_text)
+
+    paste(tab_header, chunk_start, plot_content, chunk_end, download_text, collapse = '\n') 
 })
 ```
 
