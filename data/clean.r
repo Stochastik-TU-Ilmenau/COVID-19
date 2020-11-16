@@ -280,6 +280,8 @@ write.csv(world_tot, file='./clean/data_world_tot.csv', row.names=FALSE)
 ## 3) estimate reproduction numbers
 source("../estimator.r")
 
+cases_columns <- c("date", "new.cases")
+
 ### World total (JHU)
 R_world <- repronum(
     world_tot$new.cases,
@@ -291,7 +293,7 @@ R_world <- repronum(
 )
 
 fname <- paste0("estimates/World_JHU_R.csv")
-write.csv(cbind(world_tot[,c("date", "new.cases", "reg0.name")], R_world), fname, row.names = FALSE)
+write.csv(cbind(world_tot[, cases_columns], R_world), fname, row.names = FALSE)
 
 ### countries (JHU)
 for (country in unique(world$reg0.name)) {
@@ -306,7 +308,7 @@ for (country in unique(world$reg0.name)) {
     )
 
     fname <- paste0("estimates/", country, "_JHU_R.csv")
-    write.csv(cbind(cases, R), fname, row.names = FALSE)
+    write.csv(cbind(cases[, cases_columns], R), fname, row.names = FALSE)
 }
 
 ### Germany (Total, RKI)
@@ -320,7 +322,7 @@ R_ger <- repronum(
 )
 
 fname <- paste0("estimates/Germany_RKI_R.csv")
-write.csv(cbind(ger_tot[,c("date", "new.cases")], R_ger), fname, row.names = FALSE)
+write.csv(cbind(ger_tot[,cases_columns], R_ger), fname, row.names = FALSE)
 
 ### Germany (States, RKI)
 for (state in unique(ger_b$reg0.name)) {
@@ -335,5 +337,5 @@ for (state in unique(ger_b$reg0.name)) {
     )
 
     fname <- paste0("estimates/Germany_", state, "_RKI_R.csv")
-    write.csv(cbind(cases, R), fname, row.names = FALSE)
+    write.csv(cbind(cases[,cases_columns], R), fname, row.names = FALSE)
 }
