@@ -1,6 +1,7 @@
 "date","new.cases","repronum","repronum.se","ci.lower","ci.upper"
 2021-01-01,58629,NA,NA,NA,NA
-2020-01-22,-58629,NA,NA,NA,NA
+2021-01-02,33,NA,NA,NA,NA
+2020-01-22,-58662,NA,NA,NA,NA
 2020-01-23,1,NA,NA,NA,NA
 2020-01-24,2,NA,NA,NA,NA
 2020-01-25,0,NA,NA,NA,NA
