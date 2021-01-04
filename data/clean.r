@@ -55,7 +55,7 @@ ger$date <- as_date(ger$date) # date in correct format
 ger <- ger[!(ger$date == today),] # remove today
 ger$yday <- yday(ger$date) # add yday
 ger$day <- ger$yday - min(ger$yday) # add day
-ger <- ger[order(ger$day),] # reorder
+ger <- ger[order(ger$date),] # reorder
 # for derived data frames additonal case statistics (tot.cases, ...) are added;
 # here too many combinations of factors make this impractical !
 # reordering:
@@ -93,7 +93,7 @@ ger_b <- merge(ger_b, lookup_ger_bundl)
 ger_b$reg0.id <- ger_b$reg0.id.1
 ger_b$reg0.id.1 <- NULL
 #ger_b <- ger_b[order(ger_b$reg0.id),]
-#ger_b <- ger_b[order(ger_b$day),]
+#ger_b <- ger_b[order(ger_b$date),]
 # complete combinations of factors:
 #df1 <- unique(ger_b[, c("day", "yday", "date")])
 ger_b$date <- as_date(ger_b$date)
@@ -106,7 +106,7 @@ ger_b <- merge(ger_b, df3, all=TRUE)
 ger_b[is.na(ger_b)] <- 0
 # order by reg0 and date:
 ger_b <- ger_b[order(ger_b$reg0.id),]
-ger_b <- ger_b[order(ger_b$day),]
+ger_b <- ger_b[order(ger_b$date),]
 # add case statistics:
 for (id in ger_b$reg0.id) {
   mask <- ger_b$reg0.id == id
@@ -128,7 +128,7 @@ write.csv(ger_b, file='./clean/data_ger_bundl.csv', row.names=FALSE)
 ## 2) region: "Deutschland" without sub-regions ================================
 ger_tot <- read.csv('./clean/data_ger_bundl.csv')
 ger_tot <- aggregate(cbind(tot.cases, tot.dead, new.cases, new.dead)
-                   ~ day + yday + date, ger_tot, sum)
+                   ~ date, ger_tot, sum)
 write.csv(ger_tot, file='./clean/data_ger_tot.csv', row.names=FALSE)
 ## =============================================================================
 
@@ -204,19 +204,19 @@ world <- world[!(world$date == today),] # remove today
 world$yday <- yday(world$date) # add yday
 world$day <- world$yday - min(world$yday) # add day
 world <- world[order(world$reg0.name),] # reorder
-world <- world[order(world$day),] # reorder
+world <- world[order(world$date),] # reorder
 # aggregating reg1:
 australia <- aggregate(cbind(tot.cases, tot.dead, tot.recovered)
-                       ~ day + yday + date + reg0.name,
+                       ~ date + reg0.name,
                        data=subset(world, reg0.name == 'Australia'), sum)
 australia$reg1.name <- ''
 world <- world[!(world$reg0.name == 'Australia'),] # remove australia
 world <- merge(world, australia, all=TRUE)
 canada <- aggregate(cbind(tot.cases, tot.dead)
-                    ~ day + yday + date + reg0.name,
+                    ~ date + reg0.name,
                     data=subset(world, reg0.name == 'Canada'
                                        & reg1.name != ''), sum)
-canada2 <- aggregate(tot.recovered ~ day + yday + date + reg0.name,
+canada2 <- aggregate(tot.recovered ~ date + reg0.name,
                      data=subset(world, reg0.name == 'Canada'
                                         & reg1.name == ''), sum)
 canada$reg1.name <- ''
@@ -224,7 +224,7 @@ canada <- merge(canada, canada2)
 world <- world[!(world$reg0.name == 'Canada'),] # remove canada
 world <- merge(world, canada, all=TRUE)
 china <- aggregate(cbind(tot.cases, tot.dead, tot.recovered)
-                   ~ day + yday + date + reg0.name,
+                   ~ date + reg0.name,
                    data=subset(world, reg0.name == 'China'), sum)
 china$reg1.name <- ''
 world <- world[!(world$reg0.name == 'China'),] # remove china
@@ -245,7 +245,7 @@ levels(world$reg0.name)[levels(world$reg0.name)
 world <- merge(world, lookup_world)
 # reorder:
 world <- world[order(world$reg0.id),]
-world <- world[order(world$day),]
+world <- world[order(world$date),]
 # add case statistics:
 for (id in world$reg0.id) {
   mask <- world$reg0.id == id
@@ -265,7 +265,7 @@ world <- world[, c("day", "yday", "date",
                "tot.cases", "tot.dead", "tot.recovered",
                "new.cases", "new.dead", "new.recovered")]
 #world <- world[order(world$reg0.id),]
-#world <- world[order(world$day),]
+#world <- world[order(world$date),]
 write.csv(world, file='./clean/data_world_jh.csv', row.names=FALSE)
 # ==============================================================================
 
@@ -273,7 +273,7 @@ write.csv(world, file='./clean/data_world_jh.csv', row.names=FALSE)
 world_tot <- read.csv('./clean/data_world_jh.csv')
 world_tot <- aggregate(cbind(tot.cases, tot.dead, tot.recovered,
                              new.cases, new.dead, new.recovered)
-                     ~ day + yday + date, world_tot, sum)
+                     ~ date, world_tot, sum)
 write.csv(world_tot, file='./clean/data_world_tot.csv', row.names=FALSE)
 ## =============================================================================
 

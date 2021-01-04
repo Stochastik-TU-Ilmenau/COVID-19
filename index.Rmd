@@ -51,8 +51,8 @@ numcountries <- 20
 world_tot$reg0.name <- "World"
 johns_hopkins <- merge(johns_hopkins, world_tot, all=TRUE)
 
-maxday <- max(johns_hopkins$day)
-df <- subset(johns_hopkins, day == maxday, select = c(reg0.name, tot.cases))
+maxdate <- max(johns_hopkins$date)
+df <- subset(johns_hopkins, date == maxdate, select = c(reg0.name, tot.cases))
 df <- df[rev(order(df$tot.cases)),]
 countries <- unique(df$reg0.name[1:(numcountries + 1)])
 
