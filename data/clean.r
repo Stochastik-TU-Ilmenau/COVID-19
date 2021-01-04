@@ -86,8 +86,7 @@ write.csv(lookup_ger_bundl,
 
 ## 2) region: "Deutschland" - sub-regions: "Bundeslaender" =====================
 ger_b <- read.csv('./clean/data_ger_all.csv')
-ger_b <- aggregate(cbind(new.cases, new.dead) ~ day + yday + date
-                   + reg0.id + reg0.name, ger_b, sum)
+ger_b <- aggregate(cbind(new.cases, new.dead) ~ date + reg0.id + reg0.name, ger_b, sum)
 # replace numerical ids with codes from lookup:
 ger_b <- merge(ger_b, lookup_ger_bundl)
 ger_b$reg0.id <- ger_b$reg0.id.1
