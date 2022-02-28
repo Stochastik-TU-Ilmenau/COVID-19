@@ -1,4 +1,5 @@
 library(lubridate, warn.conflicts=FALSE)
+library(tidyverse)
 today <- today()
 
 ## script for preprocessing data ===============================================
@@ -33,8 +34,15 @@ today <- today()
 # this data.frame does NOT contain ALL combinations of factors !
 # and they are not completed either since too many combinations...
 # all combinations only in derived data frames (see below)
-#
+# newer RKI data contain only IdLandkreis (no Bundesland etc.) so we have to add them ourselves
 ger_today <- read.csv(paste0('./rki_data/RKI_COVID19_', today, '.csv'))
+
+meta_to_add <- read_csv("./rki_data/RKI_COVID19_2021-04-06.csv", col_types = cols()) %>%
+	distinct(IdBundesland, Bundesland, Landkreis, IdLandkreis)
+ger_today <- ger_today %>%
+	mutate(IdLandkreis = str_pad(IdLandkreis, 5, "left", "0")) %>%
+	inner_join(meta_to_add, by = "IdLandkreis")
+
 # test if all Bundeslaender are available:
 if (length(unique(ger_today$IdBundesland)) == 16) {
   write.csv(ger_today,
