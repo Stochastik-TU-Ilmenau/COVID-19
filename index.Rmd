@@ -27,6 +27,8 @@ of the
 library(lubridate, warn.conflicts = F)
 library(plotly, warn.conflicts = F)
 library(stringr, warn.conflicts = F)
+library(htmltools, warn.conflicts = F)
+library(htmlwidgets, warn.conflicts = F)
 Sys.setlocale('LC_TIME', 'C')
 source("plot.r")
 source("estimator.r")
@@ -66,9 +68,28 @@ plots <- lapply(countries, function(country_name) {
 
 out <- lapply(seq_along(plots), function(i) {
     tab_header <- knitr::knit_expand(text = sprintf("### %s\n", countries[i]))
-    chunk_start <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE}")
+    #chunk_start <- knitr::knit_expand(text = "\n```{r, echo = F, fig.width = 10, warning = FALSE}")
 
-    plot_content <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i))
+    plt_fname <- str_interp("plots/index/${countries[i]}.html")
+    saveWidget(
+        partial_bundle(plots[[i]]),
+        plt_fname,
+        selfcontained = F,
+        libdir = "libs"
+    )
+    # plot_content <- knitr::knit_expand(text = sprintf("\nplots[[%d]]", i))
+    plot_content <- knitr::knit_expand(
+        text = as.character(
+            tags$iframe(
+                src = plt_fname,
+                scrolling = "no",
+                seamless = "seamless",
+                frameBorder = "0",
+                width = "100%",
+                height = "480px"
+            )
+        )
+    )
 
     chunk_end <- knitr::knit_expand(text = "\n```\n")
 
@@ -92,7 +113,14 @@ out <- lapply(seq_along(plots), function(i) {
     \n"
 
     download_text <- str_interp(download_text)
-    paste(tab_header, chunk_start, plot_content, chunk_end, download_text, collapse = '\n')
+    paste(
+        tab_header,
+        #chunk_start,
+        plot_content,
+        #chunk_end,
+        download_text,
+        collapse = "\n"
+    )
 })
 
 ```
