@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Monitoring der Ausbreitung von COVID-19 durch Schätzen der Reproduktionszahl im Verlauf der Zeit</title>
+
+<script src="html_libraries/header-attrs-2.11/header-attrs.js"></script>
+<script src="html_libraries/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="html_libraries/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
+<script src="html_libraries/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="html_libraries/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="html_libraries/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="html_libraries/navigation-1.1/tabsets.js"></script>
+<link href="html_libraries/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="html_libraries/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Monitoring der Ausbreitung von COVID-19
+durch Schätzen der Reproduktionszahl im Verlauf der Zeit</h1>
+
+</div>
+
+
+<p>Erstellt von <a
+href="https://www.tu-ilmenau.de/stochastik/team/thomas-hotz/">Prof. Dr. Thomas
+Hotz</a>, <a
+href="https://www.tu-ilmenau.de/stochastik/team/stefan-heyder/">Stefan
+Heyder</a>, <a
+href="https://www.tu-ilmenau.de/stochastik/team/matthias-glock/">Matthias
+Glock</a> und <a
+href="https://www.tu-ilmenau.de/stochastik/team/sebastian-semper/">Sebastian
+Semper</a> der <a href="https://www.tu-ilmenau.de/stochastik/">AG
+Stochastik</a>, <a href="https://www.tu-ilmenau.de/">Technische
+Universität Ilmenau</a> <br/> in Zusammenarbeit mit <a
+href="https://ekvv.uni-bielefeld.de/pers_publ/publ/PersonDetail.jsp?personId=21463&amp;lang=de">Prof. Dr. Alexander
+Krämer</a> und <a href="mailto:anne.boehle@uni-bielefeld.de">Anne
+Böhle</a> der <a
+href="https://www.uni-bielefeld.de/gesundhw/index.html">Fakultät für
+Gesundheitswissenschaften</a>, <a
+href="https://www.uni-bielefeld.de/">Universität Bielefeld</a>.</p>
+<div id="section"
+class="section level2 tabset tabset-fade tabset-pills">
+<h2 class="tabset tabset-fade tabset-pills"></h2>
+<!--
+See https://github.com/rstudio/flexdashboard/issues/80#issuecomment-247139450
+on generating tabs in rmarkdown automatically
+-->
+<div id="deutschland" class="section level3">
+<h3>Deutschland</h3>
+<iframe src="plots/germany/Deutschland.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_RKI_R.csv'>hier</a> herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="baden-württemberg" class="section level3">
+<h3>Baden-Württemberg</h3>
+<iframe src="plots/germany/Baden-Württemberg.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Baden-Württemberg_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="bayern" class="section level3">
+<h3>Bayern</h3>
+<iframe src="plots/germany/Bayern.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Bayern_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="berlin" class="section level3">
+<h3>Berlin</h3>
+<iframe src="plots/germany/Berlin.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Berlin_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="brandenburg" class="section level3">
+<h3>Brandenburg</h3>
+<iframe src="plots/germany/Brandenburg.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Brandenburg_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="bremen" class="section level3">
+<h3>Bremen</h3>
+<iframe src="plots/germany/Bremen.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Bremen_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="hamburg" class="section level3">
+<h3>Hamburg</h3>
+<iframe src="plots/germany/Hamburg.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Hamburg_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="hessen" class="section level3">
+<h3>Hessen</h3>
+<iframe src="plots/germany/Hessen.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Hessen_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="mecklenburg-vorpommern" class="section level3">
+<h3>Mecklenburg-Vorpommern</h3>
+<iframe src="plots/germany/Mecklenburg-Vorpommern.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Mecklenburg-Vorpommern_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="niedersachsen" class="section level3">
+<h3>Niedersachsen</h3>
+<iframe src="plots/germany/Niedersachsen.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Niedersachsen_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="nordrhein-westfalen" class="section level3">
+<h3>Nordrhein-Westfalen</h3>
+<iframe src="plots/germany/Nordrhein-Westfalen.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Nordrhein-Westfalen_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="rheinland-pfalz" class="section level3">
+<h3>Rheinland-Pfalz</h3>
+<iframe src="plots/germany/Rheinland-Pfalz.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Rheinland-Pfalz_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="saarland" class="section level3">
+<h3>Saarland</h3>
+<iframe src="plots/germany/Saarland.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Saarland_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="sachsen" class="section level3">
+<h3>Sachsen</h3>
+<iframe src="plots/germany/Sachsen.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Sachsen_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="sachsen-anhalt" class="section level3">
+<h3>Sachsen-Anhalt</h3>
+<iframe src="plots/germany/Sachsen-Anhalt.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Sachsen-Anhalt_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="schleswig-holstein" class="section level3">
+<h3>Schleswig-Holstein</h3>
+<iframe src="plots/germany/Schleswig-Holstein.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Schleswig-Holstein_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+<div id="thüringen" class="section level3">
+<h3>Thüringen</h3>
+<iframe src="plots/germany/Thüringen.html" scrolling="no" seamless="seamless" frameBorder="0"></iframe>
+<details>
+<summary>
+Daten herunterladen (Datenstand 12.01.2023, 13:16)
+</summary>
+<p>Die Daten zu dieser Grafik können Sie
+<a href='data/estimates/Germany_Thüringen_RKI_R.csv'>hier</a>
+herunterladen.</p>
+Diese Datei enthält folgende Spalten:
+<ul>
+<li>
+<b>date</b> das Datum,
+</li>
+<li>
+<b>new.cases</b> die Anzahl an neuen Fällen an diesem Tag,
+</li>
+<li>
+<b>repronum</b> die geschätzte Reproduktionszahl an diesem Tag,
+</li>
+<li>
+<b>repronum.se</b> der (geschätzte) Standardfehler der
+Reproduktionszahl,
+</li>
+<li>
+<b>ci.lower</b> die untere Grenze des 95% Konfidenzintervalls und
+</li>
+<li>
+<b>ci.upper</b> die obere Grenze des 95% Konfidentervalls.
+</li>
+</ul>
+</details>
+</div>
+</div>
+<div id="section-1" class="section level2">
+<h2></h2>
+<p>Neben den hier dargestellten Ergebnissen für Deutschland und seine
+Bundesländer finden sich auf den <a
+href="index.html">englisch-sprachigen Seiten</a> solche für die <a
+href="index.html">Welt und die 20 am stärksten betroffenen Länder</a>
+sowie für <a href="all.html">alle verfügbaren Länder</a>.</p>
+<div id="anmerkungen" class="section level3">
+<h3>Anmerkungen</h3>
+<ul>
+<li>Geschätzt wird die (Netto-)<strong>Reproduktionszahl</strong>
+<em>R(t)</em> am Tag <em>t</em>, das heißt die durchschnittliche Anzahl
+von Menschen, die jemand, der am Tag <em>t</em> infiziert wurde, unter
+gleichbleibenden Bedingungen infizieren würde.</li>
+<li>Der Schätzer wurde <a href="#ref1">(Fraser 2007)</a> entnommen. Er
+beruht auf einem Vergleich der Anzahl der Infektionen zum fraglichen
+Zeitpunkt mit der Anzahl der infektiösen Fälle zu dieser Zeit, gewichtet
+mit ihrer jeweiligen Infektiosität. Man beachte, dass eine im Verhältnis
+zu den gemeldeten Fällen konstant bleibende Dunkelziffer die Schätzungen
+nicht verändert, da sie sich mit demselben Proportionalitätsfaktor
+sowohl auf die Zahl der Infizierten als auch der Infektiösen auswirken
+würde.</li>
+<li>Für den Schätzer wurden mit Hilfe der Delta-Methode (approximative,
+punktweise) <strong>95%-Konfidenzintervalle</strong> hergeleitet.</li>
+<li>Allerdings spiegelt die Größe der Konfidenzintervalle nur diejenige
+statistische Unsicherheit wider, welche durch die zufällige Dynamik der
+Epidemie entsteht. Da der Schätzer jedoch auf gewissen Annahmen über die
+Infektiosität des Virus basiert und darüberhinaus die zugrundeliegenden
+Daten aufgrund von sich ändernden Meldekriterien, der Anzahl
+durchgeführter Tests etc. nicht zu vernachlässigende Ungenauigkeiten
+aufweisen, <strong>sollten die Schätzungen vorsichtig interpretiert
+werden</strong>. Beispielsweise wirken sich bei den hier verwendeten
+Daten Wochenendeffekte stark auf das Meldedatum aus, was wiederum die
+Schätzungen beeinflusst. Dennoch glauben wir, dass sich aus den
+Schätzungen qualitativ richtige Erkenntnisse ableiten lassen.</li>
+<li>Die Schätzungen werden als schwarze Linien, die zugehörigen
+Konfidenzintervalle als graue Streifen dargestellt, wobei die Werte
+gemäß der (<strong>logarithmischen Skala</strong> der) <strong>linken
+Achse</strong> aufgetragen sind (daher ist 0 auf der Achse nie sichtbar,
+sondern entspricht dem unendlich fernen unteren Ende der Achse). Konnten
+Schätzungen wegen mangelhaften Daten nicht berechnet werden, wird durch
+eine gestrichelte Linie ohne Konfidenzintervalle interpoliert.</li>
+<li>Der <strong>kritische Wert</strong> für die Reproduktionszahl ist
+<strong>1</strong>, markiert als rote horizontale Linie. Ein größerer
+Wert als Eins würde zu einem exponentiellen Anstieg der Anzahl an
+Infektionen führen, ein kleinerer zu einem Abfallen.</li>
+<li>Die Analyse basiert auf den <strong>neu gemeldeten Fällen</strong>
+der Coronavirus-Krankheit 2019 (COVID-19) pro Tag, angezeigt als blaue
+Säulen entsprechend der (linearen) Skala der <strong>rechten
+Achse</strong>. Die zu Grunde liegenden <a href="#ref2">Daten</a>
+stammen vom <a href="https://www.rki.de">Robert Koch-Institut</a>.</li>
+<li>Für die geschätzten Reproduktionszahlen (schwarze Linie, linke
+vertikale Achse) bezieht sich die horizontale Achse auf das zugehörige
+Infektionsdatum, während sie sich für die neu gemeldeten Fälle (blaue
+Säulen, rechte vertikale Achse) auf das Meldedatum bezieht. Montage sind
+durch dünne vertikale Linien gekennzeichnet.</li>
+<li>Die Grafiken werden täglich aktualisiert (zuletzt: 12.01.2023,
+13:16) und zeigen den Datenstand bis gestern.</li>
+<li>Zu beachten ist weiterhin, dass das Meldedatum der Fälle aufgrund
+der Inkubationszeit (ca. 5 Tage <a href="#ref3">(WHO 2020)</a>) und der
+Zeit für die Durchführung der Tests sowie der Meldung an die Behörden
+wesentlich später liegt als das tatsächliche Infektionsdatum. Der
+Einfachheit halber wird hier von einer Verzögerung von 7 Tagen
+ausgegangen. Daher wird auch die Schätzung der Reproduktionszahl
+<strong>um eine Woche zeitversetzt</strong> zu den gemeldeten Fällen
+angezeigt.</li>
+<li>Aufgrund der Meldekette vom Gesundheitsamt des Landkreises über die
+zuständige Landesbehörde an das Robert Koch-Institut werden noch Daten
+nachgetragen - und zwar für die letzten 3 Tage in nicht zu
+vernachlässigendem Umfang. Deshalb sind die jeweils <strong>letzten 3
+Werte noch nicht vollständig</strong> und werden entsprechend blasser
+dargestellt.</li>
+<li>In einer Population, in der keine Gegenmaßnahmen unternommen werden,
+wird die sogenannte <strong>Basisreproduktionszahl</strong>
+<em>R<sub>0</sub></em> auf einen Wert zwischen 2,4 und 4,1 geschätzt <a
+href="#ref4">(Read et al. 2020)</a>. Schätzungen mit höheren Werten
+könnten durch eine beträchtliche Anzahl von von außen
+<strong>eingeschleppten Fällen</strong> erklärt werden.</li>
+<li><strong>Details</strong> findet man im zugehörigen <a
+href="reports/repronum/repronum.pdf">Bericht</a> <a href="#ref5">(Hotz
+et al. 2020)</a>; der <strong>Code</strong> ist <a
+href="https://github.com/Stochastik-TU-Ilmenau/COVID-19/blob/gh-pages/estimator.r">hier</a>
+verfügbar.</li>
+</ul>
+</div>
+<div id="referenzen" class="section level3">
+<h3>Referenzen</h3>
+<p><a name="ref1">[1]</a>: Fraser, C. (2007). <em>Estimating Individual
+and Household Reproduction Numbers in an Emerging Epidemic.</em> PLOS
+ONE 2 (8), <a
+href="https://doi.org/10.1371/journal.pone.0000758">https://doi.org/10.1371/journal.pone.0000758</a>.</p>
+<p><a name="ref2">[2]</a>: Robert Koch-Institut (RKI), dl-de/by-2-0, <a
+href="https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0">https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0</a>.</p>
+<p><a name="ref3">[3]</a> WHO (2020). Report of the WHO-China Joint
+Mission on Coronavirus Disease 2019 (COVID-19), <a
+href="https://www.who.int/publications-detail/report-of-the-who-china-joint-mission-on-coronavirus-disease-2019-(covid-19)">https://www.who.int/publications-detail/report-of-the-who-china-joint-mission-on-coronavirus-disease-2019-(covid-19)</a>.</p>
+<p><a name="ref4">[4]</a>: Read, J.M., Bridgen, J.R.E., Cummings,
+D.A.T., Ho, A., Jewell, C.P. (2020). <em>Novel coronavirus 2019-nCoV:
+early estimation of epidemiological parameters and epidemic
+predictions.</em> MedRxiv, Version 2, 01/28/2020, <a
+href="https://doi.org/10.1101/2020.01.23.20018549">https://doi.org/10.1101/2020.01.23.20018549</a>.</p>
+<p><a name="ref5">[5]</a>: Hotz, T., Glock, M., Heyder, S., Semper, S.,
+Böhle, A., Krämer, A. (2020). <em>Monitoring the spread of COVID-19 by
+estimating reproduction numbers over time.</em> <a
+href="https://arxiv.org/abs/2004.08557">arXiv:2004.08557</a>,
+18/04/2020.</p>
+<p><br/> <em><a href="impressum.html">Impressum</a></em></p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
