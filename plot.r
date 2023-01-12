@@ -249,5 +249,5 @@ plot_repronum <- function(estimates, country_name, language, unreliable = 0) {
             }),
             barmode = "stack"
         ) %>%
-	rangeslider(today() - 8 * 7, today())
+	rangeslider(today() - 8 * 7, today()) 
 }

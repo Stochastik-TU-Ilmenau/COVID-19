@@ -35,7 +35,9 @@ today <- today()
 # and they are not completed either since too many combinations...
 # all combinations only in derived data frames (see below)
 # newer RKI data contain only IdLandkreis (no Bundesland etc.) so we have to add them ourselves
-ger_today <- read.csv(paste0('./rki_data/RKI_COVID19_', today, '.csv'))
+ger_today <- read_csv(
+  paste0("https://github.com/robert-koch-institut/SARS-CoV-2-Infektionen_in_Deutschland/raw/", today, "/Aktuell_Deutschland_SarsCov2_Infektionen.csv")
+)
 
 meta_to_add <- read_csv("./rki_data/RKI_COVID19_2021-04-06.csv", col_types = cols()) %>%
 	distinct(IdBundesland, Bundesland, Landkreis, IdLandkreis)
